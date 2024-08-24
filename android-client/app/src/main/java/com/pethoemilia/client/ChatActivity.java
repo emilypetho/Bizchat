@@ -1,0 +1,119 @@
+package com.pethoemilia.client;
+
+import android.content.Context;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.pethoemilia.client.adapter.ChatAdapter;
+import com.pethoemilia.client.api.GroupClient;
+import com.pethoemilia.client.api.MessageClient;
+import com.pethoemilia.client.entity.Group;
+import com.pethoemilia.client.entity.GroupSession;
+import com.pethoemilia.client.entity.Message;
+import com.pethoemilia.client.entity.User;
+import com.pethoemilia.client.entity.UserSession;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+
+public class ChatActivity extends AppCompatActivity {
+
+    private RecyclerView recyclerView;
+    private ChatAdapter adapter;
+    private MessageClient messageClient;
+    private TextView chatNameTextView;
+    private EditText editTextMessage;
+    private Button buttonSend;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_chat);
+
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ChatAdapter();
+        recyclerView.setAdapter(adapter);
+
+        chatNameTextView = findViewById(R.id.chat_name);
+        editTextMessage = findViewById(R.id.editTextMessage);
+        buttonSend = findViewById(R.id.buttonSend);
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://192.168.0.111:8080/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        messageClient = retrofit.create(MessageClient.class);
+
+        Group group = GroupSession.getGroup();
+        chatNameTextView.setText(group.getName());
+
+        loadMessagesForGroup(group.getId());
+
+        buttonSend.setOnClickListener(v -> sendMessage());
+    }
+
+    private void sendMessage() {
+        String messageContent = editTextMessage.getText().toString().trim();
+        if (!messageContent.isEmpty()) {
+            Group group = GroupSession.getGroup();
+            User sender = UserSession.getUser();
+
+            Call<Message> call = messageClient.save(new Message(messageContent,group,sender));
+            call.enqueue(new Callback<Message>() {
+                @Override
+                public void onResponse(Call<Message> call, Response<Message> response) {
+                    if (response.isSuccessful()) {
+                        editTextMessage.setText("");
+                        loadMessagesForGroup(group.getId());
+                    } else {
+                        Log.e("ChatActivity", "Failed to send message: " + response.message());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Message> call, Throwable t) {
+                    Log.e("ChatActivity", "Network error", t);
+                }
+            });
+        }
+    }
+
+    private void loadMessagesForGroup(Long groupId) {
+        Call<List<Message>> call = messageClient.findByGroupId(groupId);
+        call.enqueue(new Callback<List<Message>>() {
+            @Override
+            public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {
+                if (response.isSuccessful()) {
+                    List<Message> messages = response.body();
+                    if (messages != null) {
+                        adapter.setMessages(messages);
+                        recyclerView.scrollToPosition(adapter.getItemCount() - 1); // Scroll to the last message
+                    }
+                } else {
+                    Log.e("ChatActivity", "API error: " + response.message());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Message>> call, Throwable t) {
+                Log.e("ChatActivity", "Network error", t);
+            }
+        });
+    }
+}

@@ -1,0 +1,28 @@
+server:
+  port: 8080 #a port amelyen elered az alkalmazast
+
+spring:  
+  application:
+    name: backend-service #az alkalmazas neve
+
+  security:
+    user:
+      name: alpar #felhasznalonev
+      password: $2a$12$cEDcchID3ErUi3JbwscbbuUZBKr8NZCLYDS.Llf/9CiiTbpwepIQC    #jelszo    
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver #a mysql driver osztalya
+    url: jdbc:mysql://localhost:3306/chatapp?useSSL=false&allowPublicKeyRetrieval=true #a mysql url-je, ide jon a port es az adatbazis neve is 
+    username: root #a mysql felhasznaloneve
+    password: 50ReszeltAlma #a mysql jelszava
+  jpa:
+    show-sql: true #a sql lekerdezesek megjelenitese
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL8Dialect #a mysql dialect-je
+    hibernate:
+      ddl-auto: update  #a tablak letrehozasa automatikusan tortenik meg 
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+logging:  
+  level:
+    root: info
