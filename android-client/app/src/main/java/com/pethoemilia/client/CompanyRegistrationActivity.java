@@ -2,36 +2,16 @@ package com.pethoemilia.client;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
-import android.text.style.StyleSpan;
-import android.graphics.Typeface;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.textfield.MaterialAutoCompleteTextView;
-import com.google.android.material.textfield.TextInputLayout;
-import com.google.gson.Gson;
 import com.pethoemilia.client.api.CompanyClient;
-import com.pethoemilia.client.api.UserClient;
-import com.pethoemilia.client.databinding.ActivityMainBinding;
+import com.pethoemilia.client.databinding.ActivityCompanyRegistrationBinding;
 import com.pethoemilia.client.entity.Company;
-import com.pethoemilia.client.entity.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -39,9 +19,9 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity3 extends AppCompatActivity {
+public class CompanyRegistrationActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding;
+    private ActivityCompanyRegistrationBinding binding;
     private CompanyClient companyClient;
     private TextView textViewResult;
     private Button button;
@@ -54,13 +34,13 @@ public class MainActivity3 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // Initialize the binding
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityCompanyRegistrationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        setContentView(R.layout.activity_main3);
+        setContentView(R.layout.activity_company_registration);
 
         // Set up Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.111:8080/") // Base URL for the backend
+                .baseUrl("http://192.168.0.104:8080/") // Base URL for the backend
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -76,24 +56,8 @@ public class MainActivity3 extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity3.this, MainActivity.class);
+                Intent intent = new Intent(CompanyRegistrationActivity.this, UserRegistrationActivity.class);
                 startActivity(intent);
-//                Call<List<Company>> companyCall = companyClient.findAll();
-//                companyCall.enqueue(new Callback<List<Company>>() {
-//                    @Override
-//                    public void onResponse(Call<List<Company>> call, Response<List<Company>> response) {
-//                        if (response.isSuccessful()) {
-//                            Gson gson = new Gson();
-//                            String json = gson.toJson(response.body());
-//                            textViewResult.setText(json);
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Call<List<Company>> call, Throwable t) {
-//                        textViewResult.setText("Problem appeared while fetching data");
-//                    }
-//                });
             }
         });
 

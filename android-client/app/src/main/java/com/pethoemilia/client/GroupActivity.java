@@ -2,22 +2,21 @@ package com.pethoemilia.client;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.pethoemilia.client.adapter.GroupAdapter;
 import com.pethoemilia.client.api.GroupClient;
 import com.pethoemilia.client.api.MessageClient;
 import com.pethoemilia.client.entity.Group;
-import com.pethoemilia.client.entity.GroupSession;
 import com.pethoemilia.client.entity.Message;
-import com.pethoemilia.client.entity.UserSession;
+import com.pethoemilia.client.entity.User;
 
 import java.util.List;
 
@@ -27,26 +26,31 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity2 extends AppCompatActivity {
+public class GroupActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private GroupAdapter adapter;
     private GroupClient groupClient;
     private MessageClient messageClient;
 
+    private static final String PREFS_GROUP = "GroupPrefs";
+    private static final String KEY_GROUP = "group";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_group);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        loadGroupFromSharedPreferences();
 
         adapter = new GroupAdapter(new GroupAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
                 Group selectedGroup = adapter.getGroups().get(position);
-                GroupSession.setGroup(selectedGroup);
-                Intent intent = new Intent(MainActivity2.this, ChatActivity.class);
+                saveGroupToSharedPreferences(selectedGroup);
+                Intent intent = new Intent(GroupActivity.this, ChatActivity.class);
                 intent.putExtra("groupId", selectedGroup.getId());
                 startActivity(intent);
             }
@@ -55,15 +59,32 @@ public class MainActivity2 extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.111:8080/") // Backend base URL
+                .baseUrl("http://192.168.0.104:8080/") // Backend base URL
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         groupClient = retrofit.create(GroupClient.class);
         messageClient = retrofit.create(MessageClient.class);
 
-        long userId = UserSession.getUser().getId();
-        loadGroups(userId);
+        // Load user from SharedPreferences
+        User user = getUserFromSharedPreferences();
+        if (user != null) {
+            long userId = user.getId();
+            loadGroups(userId);
+        } else {
+            // Handle the case where user is not available
+            Log.e("MainActivity2", "User not found in SharedPreferences");
+        }
+    }
+
+    private User getUserFromSharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString("user", null);
+        if (userJson != null) {
+            Gson gson = new Gson();
+            return gson.fromJson(userJson, User.class);
+        }
+        return null; // Return null if no user found
     }
 
     private void loadGroups(long userId) {
@@ -106,7 +127,7 @@ public class MainActivity2 extends AppCompatActivity {
                                 break;
                             }
                         }
-                        adapter.notifyDataSetChanged(); // Frissítjük az adaptert
+                        adapter.notifyDataSetChanged(); // Update adapter
                     }
                 } else {
                     // Handle API errors
@@ -121,5 +142,25 @@ public class MainActivity2 extends AppCompatActivity {
             }
         });
     }
-}
+    private void loadGroupFromSharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_GROUP, Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString(KEY_GROUP, null);
 
+        if (userJson != null) {
+            Gson gson = new Gson();
+            Group group = gson.fromJson(userJson, Group.class); // JSON konvertálása User objektummá
+        }
+    }
+
+
+    private void saveGroupToSharedPreferences(Group group) {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_GROUP, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        Gson gson = new Gson();
+        String groupJson = gson.toJson(group); // User objektum konvertálása JSON formátumba
+
+        editor.putString(KEY_GROUP, groupJson);
+        editor.apply(); // Adatok elmentése
+    }
+}

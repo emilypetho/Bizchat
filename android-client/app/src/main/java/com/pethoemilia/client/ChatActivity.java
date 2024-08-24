@@ -1,10 +1,9 @@
 package com.pethoemilia.client;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -13,14 +12,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.pethoemilia.client.adapter.ChatAdapter;
-import com.pethoemilia.client.api.GroupClient;
 import com.pethoemilia.client.api.MessageClient;
 import com.pethoemilia.client.entity.Group;
-import com.pethoemilia.client.entity.GroupSession;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
-import com.pethoemilia.client.entity.UserSession;
 
 import java.util.List;
 
@@ -46,7 +43,7 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ChatAdapter();
+        adapter = new ChatAdapter(this);
         recyclerView.setAdapter(adapter);
 
         chatNameTextView = findViewById(R.id.chat_name);
@@ -54,13 +51,13 @@ public class ChatActivity extends AppCompatActivity {
         buttonSend = findViewById(R.id.buttonSend);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.111:8080/")
+                .baseUrl("http://192.168.0.104:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
         messageClient = retrofit.create(MessageClient.class);
 
-        Group group = GroupSession.getGroup();
+        Group group = getGroupFromSharedPreferences();
         chatNameTextView.setText(group.getName());
 
         loadMessagesForGroup(group.getId());
@@ -68,29 +65,50 @@ public class ChatActivity extends AppCompatActivity {
         buttonSend.setOnClickListener(v -> sendMessage());
     }
 
+    private User getUserFromSharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString("user", null);
+        if (userJson != null) {
+            Gson gson = new Gson();
+            return gson.fromJson(userJson, User.class);
+        }
+        return null; // Return null if no user found
+    }
+
+    private Group getGroupFromSharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences("GroupPrefs", Context.MODE_PRIVATE);
+        String groupJson = sharedPreferences.getString("group", null);
+            Gson gson = new Gson();
+            return gson.fromJson(groupJson, Group.class);
+    }
+
     private void sendMessage() {
         String messageContent = editTextMessage.getText().toString().trim();
         if (!messageContent.isEmpty()) {
-            Group group = GroupSession.getGroup();
-            User sender = UserSession.getUser();
-
-            Call<Message> call = messageClient.save(new Message(messageContent,group,sender));
-            call.enqueue(new Callback<Message>() {
-                @Override
-                public void onResponse(Call<Message> call, Response<Message> response) {
-                    if (response.isSuccessful()) {
-                        editTextMessage.setText("");
-                        loadMessagesForGroup(group.getId());
-                    } else {
-                        Log.e("ChatActivity", "Failed to send message: " + response.message());
+            Group group = getGroupFromSharedPreferences();
+            User sender = getUserFromSharedPreferences();
+            if (sender != null) {
+                Call<Message> call = messageClient.save(new Message(messageContent,group,sender));
+                call.enqueue(new Callback<Message>() {
+                    @Override
+                    public void onResponse(Call<Message> call, Response<Message> response) {
+                        if (response.isSuccessful()) {
+                            editTextMessage.setText("");
+                            loadMessagesForGroup(group.getId());
+                        } else {
+                            Log.e("ChatActivity", "Failed to send message: " + response.message());
+                        }
                     }
-                }
 
-                @Override
-                public void onFailure(Call<Message> call, Throwable t) {
-                    Log.e("ChatActivity", "Network error", t);
-                }
-            });
+                    @Override
+                    public void onFailure(Call<Message> call, Throwable t) {
+                        Log.e("ChatActivity", "Network error", t);
+                    }
+                });
+            } else {
+                // Handle the case where user is not available
+                Log.e("MainActivity2", "User not found in SharedPreferences");
+            }
         }
     }
 

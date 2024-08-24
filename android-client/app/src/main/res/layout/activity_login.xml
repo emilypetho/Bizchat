@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity4">
+    tools:context=".LoginActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -58,7 +58,7 @@
                 android:drawableEnd="@drawable/done_icon"
                 android:hint="Enter your email address"
                 android:minHeight="48dp"
-                android:text="emiliapetho@gmail.com"
+                android:text=""
                 android:id="@+id/editTextEmail"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -78,7 +78,7 @@
                     android:id="@+id/editTextPassword"
                     android:layout_height="match_parent"
                     android:inputType="textPassword"
-                    android:text="dhbgfh"
+                    android:text=""
                     android:ems="15">
                 </com.google.android.material.textfield.TextInputEditText>
             </com.google.android.material.textfield.TextInputLayout>
@@ -86,6 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
                 <CheckBox
+                    android:id="@+id/checkboxRememberMe"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Remember me"

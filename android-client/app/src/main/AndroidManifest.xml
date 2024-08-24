@@ -21,16 +21,16 @@
             android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".UserRegistrationActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity3"
+            android:name=".CompanyRegistrationActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity2"
+            android:name=".GroupActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity4"
+            android:name=".LoginActivity"
             android:exported="true"
             android:theme="@style/Theme.Client">
             <intent-filter>

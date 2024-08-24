@@ -15,7 +15,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.pethoemilia.client.api.CompanyClient;
 import com.pethoemilia.client.api.UserClient;
-import com.pethoemilia.client.databinding.ActivityMainBinding;
+import com.pethoemilia.client.databinding.ActivityUserRegistrationBinding;
 import com.pethoemilia.client.entity.Company;
 import com.pethoemilia.client.entity.User;
 import java.util.ArrayList;
@@ -27,10 +27,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MainActivity extends AppCompatActivity {
+public class UserRegistrationActivity extends AppCompatActivity {
 
 //    private ActivityMainBinding binding;
-    private ActivityMainBinding binding;
+    private ActivityUserRegistrationBinding binding;
     private UserClient userClient;
     private CompanyClient companyClient;
     private TextView textViewResult;
@@ -52,12 +52,12 @@ public class MainActivity extends AppCompatActivity {
 //        setContentView(R.layout.activity_main);
 
         // Initialize the binding
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityUserRegistrationBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Set up Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.111:8080/") // Base URL for the backend
+                .baseUrl("http://192.168.0.104:8080/") // Base URL for the backend
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() { // beteszek egy click listenert a buttonhoz, amikor megnyomodik a gomb vegrehajtja ami a mtodusban van
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, MainActivity3.class);
+                Intent intent = new Intent(UserRegistrationActivity.this, CompanyRegistrationActivity.class);
                 startActivity(intent);
             }
         });
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                                         });
                                     }
                                 }
-                                Intent intent = new Intent(MainActivity.this, MainActivity4.class);
+                                Intent intent = new Intent(UserRegistrationActivity.this, LoginActivity.class);
                                 startActivity(intent);
                             } else {
                                 companyTextInputLayout.setError("Company not found");
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                     for (Company company : response.body()) {
                         companyNames.add(company.getName());
                     }
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_dropdown_item_1line, companyNames);
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(UserRegistrationActivity.this, android.R.layout.simple_dropdown_item_1line, companyNames);
                     autoCompleteCompany.setAdapter(adapter);
                 } else {
                     textViewResult.setText("Sikertelen válasz a szervertől.");
