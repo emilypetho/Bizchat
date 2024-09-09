@@ -51,7 +51,7 @@ public class ChatActivity extends AppCompatActivity {
         buttonSend = findViewById(R.id.buttonSend);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.104:8080/")
+                .baseUrl(MyConst.URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -66,8 +66,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private User getUserFromSharedPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String userJson = sharedPreferences.getString("user", null);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString(MyConst.USER, null);
         if (userJson != null) {
             Gson gson = new Gson();
             return gson.fromJson(userJson, User.class);
@@ -76,19 +76,21 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private Group getGroupFromSharedPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("GroupPrefs", Context.MODE_PRIVATE);
-        String groupJson = sharedPreferences.getString("group", null);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String groupJson = sharedPreferences.getString(MyConst.GROUP, null);
             Gson gson = new Gson();
             return gson.fromJson(groupJson, Group.class);
     }
 
     private void sendMessage() {
         String messageContent = editTextMessage.getText().toString().trim();
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
         if (!messageContent.isEmpty()) {
             Group group = getGroupFromSharedPreferences();
             User sender = getUserFromSharedPreferences();
             if (sender != null) {
-                Call<Message> call = messageClient.save(new Message(messageContent,group,sender));
+                Call<Message> call = messageClient.save(new Message(messageContent,group,sender),encodedcredentials);
                 call.enqueue(new Callback<Message>() {
                     @Override
                     public void onResponse(Call<Message> call, Response<Message> response) {
@@ -113,7 +115,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void loadMessagesForGroup(Long groupId) {
-        Call<List<Message>> call = messageClient.findByGroupId(groupId);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
+        Call<List<Message>> call = messageClient.findByGroupId(groupId,encodedcredentials);
         call.enqueue(new Callback<List<Message>>() {
             @Override
             public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Base64;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -34,9 +36,6 @@ public class LoginActivity extends AppCompatActivity {
     private TextView textViewResult;
     private CheckBox checkBox;
 
-    private static final String PREFS_USER = "UserPrefs";
-    private static final String KEY_USER = "user";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,11 +50,11 @@ public class LoginActivity extends AppCompatActivity {
         checkBox = findViewById(R.id.checkboxRememberMe);
 
         // Load saved user if available
-        loadUserFromSharedPreferences();
+        //loadUserFromSharedPreferences();
 
         // Set up Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.104:8080/")
+                .baseUrl(MyConst.URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -69,6 +68,9 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(view -> {
             String email = emailEditText.getText().toString();
             String password = passwordEditText.getText().toString();
+            String encoded = Base64.encodeToString((email + ":" + password).getBytes(), Base64.NO_WRAP);
+            String encodedcredentials = "Basic " + encoded;
+            SharedPreferences sharedPref = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
 
             if (email.isEmpty()) {
                 textViewResult.setText("Email cannot be empty");
@@ -79,78 +81,73 @@ public class LoginActivity extends AppCompatActivity {
                 textViewResult.setText("Password cannot be empty");
                 return;
             }
-
-            Call<List<User>> userCall = userClient.findAll();
-            userCall.enqueue(new Callback<List<User>>() {
+            Log.d("EncodedCredentials", encodedcredentials);
+            Log.d("Email", email);Log.d("Password", password);
+            Call<User> idCall = userClient.findByEmail(email,encodedcredentials);
+            idCall.enqueue(new Callback<User>() {
                 @Override
-                public void onResponse(Call<List<User>> call, Response<List<User>> response) {
-                    if (response.isSuccessful() && response.body() != null) {
-                        List<User> users = response.body();
-                        for (User user : users) {
-                            if (Objects.equals(user.getEmail(), email)) {
-                                if (Objects.equals(user.getPassword(), password)) {
-                                    saveUserToSharedPreferences(user); // Teljes User objektum mentése
-                                    Intent intent = new Intent(LoginActivity.this, GroupActivity.class);
-                                    startActivity(intent);
-                                    textViewResult.setText("");
-                                    return; // Kilép, ha a felhasználó megtalálása sikeres
-                                } else {
-                                    textViewResult.setText("Invalid password");
-                                    return;
-                                }
-                            }
-                        }
-                        textViewResult.setText("Invalid email");
-                    } else {
-                        textViewResult.setText("Invalid email");
+                public void onResponse(Call<User> call, Response<User> response) {
+                    Log.e("siker",String.valueOf(response.code()));
+                    if(response.isSuccessful()){
+                        Log.e("jo","jhgf");
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString(MyConst.AUTH,encodedcredentials);
+                        editor.putBoolean(MyConst.REMEMBER_ME,checkBox.isChecked());
+                        User user = response.body();
+                        Gson gson = new Gson();
+                        String userString = gson.toJson(user);
+                        editor.putString(MyConst.USER,userString);
+                        editor.apply();
+                        textViewResult.setText("");
+                        Intent intent = new Intent(LoginActivity.this, GroupActivity.class);
+                        startActivity(intent);
                     }
                 }
-
                 @Override
-                public void onFailure(Call<List<User>> call, Throwable t) {
-                    textViewResult.setText("Error: " + t.getMessage());
+                public void onFailure(Call<User> call, Throwable t) {
+                    Log.e("szar","jhgf");
                 }
             });
         });
     }
 
-    // Felhasználói adatok betöltése a SharedPreferences-ből
-    private void loadUserFromSharedPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_USER, Context.MODE_PRIVATE);
-        String userJson = sharedPreferences.getString(KEY_USER, null);
-
-        if (userJson != null) {
-            Gson gson = new Gson();
-            User user = gson.fromJson(userJson, User.class); // JSON konvertálása User objektummá
-
-            // Beállítjuk az emailt és a jelszót az EditText mezőkben
-
-            // Visszaállítjuk a CheckBox állapotát
-            boolean rememberMeChecked = sharedPreferences.getBoolean("remember_me", false);
-            checkBox.setChecked(rememberMeChecked);
-
-            // Automatikus bejelentkezés, ha be van jelölve a CheckBox
-            if (rememberMeChecked) {
-                emailEditText.setText(user.getEmail());
-                passwordEditText.setText(user.getPassword());
-                loginButton.performClick(); // Automatikus bejelentkezés
-            }
-        }
-    }
-
-    // Felhasználói adatok mentése a SharedPreferences-be
-    private void saveUserToSharedPreferences(User user) {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_USER, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        Gson gson = new Gson();
-        String userJson = gson.toJson(user); // User objektum konvertálása JSON formátumba
-
-        editor.putString(KEY_USER, userJson);
-
-        // Mentjük a CheckBox állapotát
-        editor.putBoolean("remember_me", checkBox.isChecked());
-
-        editor.apply(); // Adatok elmentése
-    }
+//    // Felhasználói adatok betöltése a SharedPreferences-ből
+//    private void loadUserFromSharedPreferences() {
+//        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_USER, Context.MODE_PRIVATE);
+//        String userJson = sharedPreferences.getString(KEY_USER, null);
+//
+//        if (userJson != null) {
+//            Gson gson = new Gson();
+//            User user = gson.fromJson(userJson, User.class); // JSON konvertálása User objektummá
+//
+//            // Beállítjuk az emailt és a jelszót az EditText mezőkben
+//
+//            // Visszaállítjuk a CheckBox állapotát
+//            boolean rememberMeChecked = sharedPreferences.getBoolean("remember_me", false);
+//            checkBox.setChecked(rememberMeChecked);
+//
+//            // Automatikus bejelentkezés, ha be van jelölve a CheckBox
+//            if (rememberMeChecked) {
+//                emailEditText.setText(user.getEmail());
+//                passwordEditText.setText(user.getPassword());
+//                loginButton.performClick(); // Automatikus bejelentkezés
+//            }
+//        }
+//    }
+//
+//    // Felhasználói adatok mentése a SharedPreferences-be
+//    private void saveUserToSharedPreferences(User user) {
+//        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_USER, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//
+//        Gson gson = new Gson();
+//        String userJson = gson.toJson(user); // User objektum konvertálása JSON formátumba
+//
+//        editor.putString(KEY_USER, userJson);
+//
+//        // Mentjük a CheckBox állapotát
+//        editor.putBoolean("remember_me", checkBox.isChecked());
+//
+//        editor.apply(); // Adatok elmentése
+//    }
 }

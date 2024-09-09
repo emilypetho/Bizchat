@@ -1,6 +1,9 @@
 package com.pethoemilia.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,11 +57,32 @@ public class UserController {
 	@GetMapping(value = "/findByEmail/{email}", produces = "application/json")
 	@Transactional
 	public ResponseEntity<User> findByEmail(@PathVariable(name = "email") String email) {
-		User user = userService.findByEmail(email);
-		if (user == null) {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<>(user, HttpStatus.OK);
+	    Optional<User> optionalUser = userService.findByEmail(email);
+	    if (optionalUser.isEmpty()) {
+	        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	    }
+	    return new ResponseEntity<>(optionalUser.get(), HttpStatus.OK);
 	}
+
+	
+	@PostMapping(value = "/register", produces = "application/json", consumes = "application/json")
+	@Transactional
+	public ResponseEntity<User> register(@RequestBody User user) {
+		return new ResponseEntity<>(userService.save(user), HttpStatus.OK);
+	}
+//
+//	@GetMapping(value = "/checkuser", produces = "plain/text")
+//	@Transactional
+//	public ResponseEntity<User> login() {
+//		return new ResponseEntity<>("Success", HttpStatus.OK);
+//	}
+//	
+//	@GetMapping(value = "/checkuser", produces = "application/json")
+//	@Transactional
+//	public ResponseEntity<Map<String, String>> login() {
+//	    Map<String, String> response = new HashMap<>();
+//	    response.put("status", "Success");
+//	    return new ResponseEntity<>(response, HttpStatus.OK);
+//	}
 
 }

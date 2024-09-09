@@ -1,6 +1,10 @@
 package com.pethoemilia.entity;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -66,6 +70,10 @@ public class User {
 	@Size(min = 8, message = "Password must be at least 8 characters long")
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	private String password;
+	
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Collections.emptyList();
+	}
 
 	public enum Gender {
 		MAN, WOMAN, OTHER
@@ -75,11 +83,6 @@ public class User {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = true)
 	private Gender gender;
-
-//	@ManyToMany(targetEntity = Group.class, fetch = FetchType.LAZY)
-//	@JoinTable(name = "user_group", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
-//	@JsonIgnore
-//	private Set<Group> groups = new HashSet<>();
 
 	@ManyToMany(targetEntity = Group.class, mappedBy = "users", cascade = CascadeType.REMOVE)
 	@JsonIgnore

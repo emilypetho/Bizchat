@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.R;
 import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
@@ -63,8 +64,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     }
 
     private User getUserFromSharedPreferences() {
-        SharedPreferences sharedPreferences = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String userJson = sharedPreferences.getString("user", null);
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString(MyConst.USER, null);
         if (userJson != null) {
             Gson gson = new Gson();
             return gson.fromJson(userJson, User.class);

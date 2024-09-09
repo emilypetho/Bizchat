@@ -9,12 +9,12 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface CompanyClient {
-
     @POST("company/save")
     Call<Company> save(@Body Company company);
 
@@ -26,5 +26,17 @@ public interface CompanyClient {
 
     @GET("company/findByName")
     Call<Long> findByName(@Query("name") String name);
+
+//    @POST("company/save")
+//    Call<Company> save(@Body Company company, @Header("Authorization") String authHeader);
+//
+//    @GET("company/findAll")
+//    Call<List<Company>> findAll(@Header("Authorization") String authHeader);
+//
+//    @DELETE("company/delete/{id}")
+//    Call<Void> delete(@Path("id") long id, @Header("Authorization") String authHeader);
+//
+//    @GET("company/findByName")
+//    Call<Long> findByName(@Query("name") String name, @Header("Authorization") String authHeader);
 
 }

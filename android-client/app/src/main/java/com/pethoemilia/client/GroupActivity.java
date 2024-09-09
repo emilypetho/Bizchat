@@ -32,11 +32,9 @@ public class GroupActivity extends AppCompatActivity {
     private GroupClient groupClient;
     private MessageClient messageClient;
 
-    private static final String PREFS_GROUP = "GroupPrefs";
-    private static final String KEY_GROUP = "group";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.e("group","grdehbetjsrk");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
 
@@ -59,7 +57,7 @@ public class GroupActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.104:8080/") // Backend base URL
+                .baseUrl(MyConst.URL) // Backend base URL
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -78,17 +76,19 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private User getUserFromSharedPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences("UserPrefs", Context.MODE_PRIVATE);
-        String userJson = sharedPreferences.getString("user", null);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString(MyConst.USER, null);
         if (userJson != null) {
             Gson gson = new Gson();
             return gson.fromJson(userJson, User.class);
         }
-        return null; // Return null if no user found
+        return null;
     }
 
     private void loadGroups(long userId) {
-        Call<List<Group>> call = groupClient.findByUserId(userId);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
+        Call<List<Group>> call = groupClient.findByUserId(userId,encodedcredentials);
         call.enqueue(new Callback<List<Group>>() {
             @Override
             public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
@@ -101,7 +101,11 @@ public class GroupActivity extends AppCompatActivity {
                         }
                     }
                 } else {
-                    // Handle API errors
+                    Log.e("Group","load group♥h "+response);
+                    if(response.code() == 401){
+                        Intent intent = new Intent(GroupActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                    }
                 }
             }
 
@@ -113,7 +117,9 @@ public class GroupActivity extends AppCompatActivity {
     }
 
     private void loadMessagesForGroup(Long groupId) {
-        Call<List<Message>> call = messageClient.findByGroupId(groupId);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
+        Call<List<Message>> call = messageClient.findByGroupId(groupId,encodedcredentials);
         call.enqueue(new Callback<List<Message>>() {
             @Override
             public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {
@@ -132,6 +138,11 @@ public class GroupActivity extends AppCompatActivity {
                 } else {
                     // Handle API errors
                     Log.e("MainActivity2", "API error: " + response.message());
+                    Log.e("Group","load message");
+                    if(response.code() == 401){
+                        Intent intent = new Intent(GroupActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                    }
                 }
             }
 
@@ -143,9 +154,8 @@ public class GroupActivity extends AppCompatActivity {
         });
     }
     private void loadGroupFromSharedPreferences() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_GROUP, Context.MODE_PRIVATE);
-        String userJson = sharedPreferences.getString(KEY_GROUP, null);
-
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String userJson = sharedPreferences.getString(MyConst.GROUP, null);
         if (userJson != null) {
             Gson gson = new Gson();
             Group group = gson.fromJson(userJson, Group.class); // JSON konvertálása User objektummá
@@ -154,13 +164,13 @@ public class GroupActivity extends AppCompatActivity {
 
 
     private void saveGroupToSharedPreferences(Group group) {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_GROUP, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         Gson gson = new Gson();
         String groupJson = gson.toJson(group); // User objektum konvertálása JSON formátumba
 
-        editor.putString(KEY_GROUP, groupJson);
+        editor.putString(MyConst.GROUP, groupJson);
         editor.apply(); // Adatok elmentése
     }
 }

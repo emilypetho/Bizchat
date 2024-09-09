@@ -40,7 +40,7 @@ public class CompanyRegistrationActivity extends AppCompatActivity {
 
         // Set up Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://192.168.0.104:8080/") // Base URL for the backend
+                .baseUrl(MyConst.URL) // Base URL for the backend
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
