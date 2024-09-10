@@ -44,6 +44,16 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         Message message = messages.get(position);
+        Long timestamp = message.getTimestamp();
+        Date messageDate = new Date(timestamp);
+        Date currentDate = new Date();
+
+        SimpleDateFormat sameDayFormat = new SimpleDateFormat("HH:mm");
+        SimpleDateFormat differentDayFormat = new SimpleDateFormat("MMM dd");
+
+        SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
+        String messageDay = dayFormat.format(messageDate);
+        String currentDay = dayFormat.format(currentDate);
 
         User user = getUserFromSharedPreferences();
         if (user != null) {
@@ -52,10 +62,34 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                 holder.senderLayout.setVisibility(View.VISIBLE);
                 holder.receiverLayout.setVisibility(View.GONE);
                 holder.senderChat.setText(message.getContent());
+                holder.senderChatTime.setVisibility(View.GONE);
+
+                // OnClickListener az idő megjelenítésére
+                holder.senderChat.setOnClickListener(v -> {
+                    if (holder.senderChatTime.getVisibility() == View.GONE) {
+                        holder.senderChatTime.setText(sameDayFormat.format(messageDate));
+                        holder.senderChatTime.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.senderChatTime.setVisibility(View.GONE); // Ismét kattintva elrejtheted
+                    }
+                });
             } else {
                 holder.senderLayout.setVisibility(View.GONE);
                 holder.receiverLayout.setVisibility(View.VISIBLE);
                 holder.receiverChat.setText(message.getContent());
+                //holder.chatSenderName.setVisibility(View.GONE);
+                holder.chatSenderName.setText(message.getSender().getName());
+                holder.receiverChatTime.setVisibility(View.GONE);
+
+                // OnClickListener az idő megjelenítésére
+                holder.receiverChat.setOnClickListener(v -> {
+                    if (holder.receiverChatTime.getVisibility() == View.GONE) {
+                        holder.receiverChatTime.setText(sameDayFormat.format(messageDate));
+                        holder.receiverChatTime.setVisibility(View.VISIBLE);
+                    } else {
+                        holder.receiverChatTime.setVisibility(View.GONE);
+                    }
+                });
             }
         } else {
             // Handle the case where user is not available
@@ -88,6 +122,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         LinearLayout receiverLayout;
         TextView senderChat;
         TextView receiverChat;
+        TextView senderChatTime;
+        TextView receiverChatTime;
+        TextView chatSenderName;
 
         public ChatViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -95,6 +132,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
             receiverLayout = itemView.findViewById(R.id.receiver_layout);
             senderChat = itemView.findViewById(R.id.sender_chat);
             receiverChat = itemView.findViewById(R.id.receiver_chat);
+            receiverChatTime = itemView.findViewById(R.id.chat_time_receiver);
+            senderChatTime = itemView.findViewById(R.id.chat_time_sender);
+            chatSenderName = itemView.findViewById(R.id.chat_sender_name);
         }
     }
 }

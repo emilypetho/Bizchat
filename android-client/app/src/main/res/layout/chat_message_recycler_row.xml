@@ -2,39 +2,87 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp">
+
+    <!-- Receiver's message layout -->
     <LinearLayout
         android:id="@+id/receiver_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/edit_text_rounded_corner"
-        android:backgroundTint="@color/chat_color_receiver"
-        android:padding="8dp"
+        android:orientation="vertical"
+        android:layout_alignParentStart="true"
         android:layout_marginEnd="80dp">
+
+        <!-- Sender name above the message -->
         <TextView
-            android:id="@+id/receiver_chat"
+            android:id="@+id/chat_sender_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="18sp">
-        </TextView>
+            android:textSize="10sp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Message text -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/edit_text_rounded_corner"
+            android:backgroundTint="@color/chat_color_receiver"
+            android:padding="8dp">
+            <TextView
+                android:id="@+id/receiver_chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <!-- Time below the message -->
+        <TextView
+            android:id="@+id/chat_time_receiver"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"/>
     </LinearLayout>
+
+    <!-- Sender's message layout -->
     <LinearLayout
         android:id="@+id/sender_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/edit_text_rounded_corner"
-        android:backgroundTint="@color/chat_color_sender"
-        android:padding="8dp"
+        android:orientation="vertical"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="80dp">
-        <TextView
-            android:id="@+id/sender_chat"
+
+        <!-- Message text -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="@drawable/edit_text_rounded_corner"
+            android:backgroundTint="@color/chat_color_sender"
+            android:padding="8dp"
+            android:layout_marginTop="15dp">
+            <TextView
+                android:id="@+id/sender_chat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <!-- Time below the message -->
+        <TextView
+            android:id="@+id/chat_time_sender"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:textColor="@color/white"
-            android:textSize="18sp">
-        </TextView>
+            android:textSize="10sp"
+            android:layout_gravity="end" />
     </LinearLayout>
 
 </RelativeLayout>

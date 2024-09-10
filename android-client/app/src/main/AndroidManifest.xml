@@ -27,10 +27,10 @@
             android:name=".CompanyRegistrationActivity"
             android:exported="false" />
         <activity
-            android:name=".GroupActivity"
+            android:name=".LoginActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".GroupActivity"
             android:exported="true"
             android:theme="@style/Theme.Client">
             <intent-filter>

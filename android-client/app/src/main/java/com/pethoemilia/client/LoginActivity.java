@@ -101,6 +101,8 @@ public class LoginActivity extends AppCompatActivity {
                         textViewResult.setText("");
                         Intent intent = new Intent(LoginActivity.this, GroupActivity.class);
                         startActivity(intent);
+                    }else{
+                        textViewResult.setText("helytelen emailcin vagy jelszo");
                     }
                 }
                 @Override
@@ -110,44 +112,4 @@ public class LoginActivity extends AppCompatActivity {
             });
         });
     }
-
-//    // Felhasználói adatok betöltése a SharedPreferences-ből
-//    private void loadUserFromSharedPreferences() {
-//        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_USER, Context.MODE_PRIVATE);
-//        String userJson = sharedPreferences.getString(KEY_USER, null);
-//
-//        if (userJson != null) {
-//            Gson gson = new Gson();
-//            User user = gson.fromJson(userJson, User.class); // JSON konvertálása User objektummá
-//
-//            // Beállítjuk az emailt és a jelszót az EditText mezőkben
-//
-//            // Visszaállítjuk a CheckBox állapotát
-//            boolean rememberMeChecked = sharedPreferences.getBoolean("remember_me", false);
-//            checkBox.setChecked(rememberMeChecked);
-//
-//            // Automatikus bejelentkezés, ha be van jelölve a CheckBox
-//            if (rememberMeChecked) {
-//                emailEditText.setText(user.getEmail());
-//                passwordEditText.setText(user.getPassword());
-//                loginButton.performClick(); // Automatikus bejelentkezés
-//            }
-//        }
-//    }
-//
-//    // Felhasználói adatok mentése a SharedPreferences-be
-//    private void saveUserToSharedPreferences(User user) {
-//        SharedPreferences sharedPreferences = getSharedPreferences(PREFS_USER, Context.MODE_PRIVATE);
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//
-//        Gson gson = new Gson();
-//        String userJson = gson.toJson(user); // User objektum konvertálása JSON formátumba
-//
-//        editor.putString(KEY_USER, userJson);
-//
-//        // Mentjük a CheckBox állapotát
-//        editor.putBoolean("remember_me", checkBox.isChecked());
-//
-//        editor.apply(); // Adatok elmentése
-//    }
 }

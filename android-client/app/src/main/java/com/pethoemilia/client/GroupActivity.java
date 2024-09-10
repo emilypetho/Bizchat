@@ -41,6 +41,13 @@ public class GroupActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        SharedPreferences sharedPref = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+//!sharedPref.getBoolean(MyConst.REMEMBER_ME,false) ||
+        if(sharedPref.getString(MyConst.AUTH, "").isEmpty()){
+            Intent intent = new Intent(GroupActivity.this, LoginActivity.class);
+            startActivity(intent);
+        }
+
         loadGroupFromSharedPreferences();
 
         adapter = new GroupAdapter(new GroupAdapter.OnItemClickListener() {
