@@ -2,6 +2,7 @@ package com.pethoemilia.service;
 
 import java.util.List;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import com.pethoemilia.entity.Message;
@@ -13,11 +14,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MessageService {
 
-	private final IMessageRepository messageRepo; // Az IUserRepository interfesz implementacioja
+//	private final IMessageRepository messageRepo;
+//
+//	public Message save(Message message) {
+//		return messageRepo.save(message);
+//	}
+	
+    private final IMessageRepository messageRepo;
+    private final RabbitTemplate rabbitTemplate;  // Add RabbitTemplate
 
-	public Message save(Message message) {
-		return messageRepo.save(message);
-	}
+    public Message save(Message message) {
+        Message savedMessage = messageRepo.save(message);
+        // Publish the saved message to RabbitMQ
+        rabbitTemplate.convertAndSend("exchange", "", savedMessage);  // Ensure correct exchange and routing key
+        return savedMessage;
+    }
 
 	public void delete(Long id) {
 		messageRepo.deleteById(id);

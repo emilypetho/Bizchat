@@ -29,6 +29,9 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 	implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+	//implementation 'com.rabbitmq:amqp-client:5.15.0'
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
 }
 
 tasks.named('test') {

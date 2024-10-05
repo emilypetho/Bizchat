@@ -2,27 +2,40 @@ server:
   port: 8080 #a port amelyen elered az alkalmazast
 
 spring:  
+  rabbitmq:
+#    host: 192.168.1.91
+#    host: 192.168.0.115
+    host: 172.20.10.3
+    #host: localhost
+    port: 5672
+    username: guest
+    password: guest
+   
   application:
-    name: backend-service #az alkalmazas neve
+    name: backend-service # Az alkalmazás neve
 
   security:
     user:
-      name: alpar #felhasznalonev
-      password: $2a$12$cEDcchID3ErUi3JbwscbbuUZBKr8NZCLYDS.Llf/9CiiTbpwepIQC    #jelszo    
+      name: emilia # Felhasználónév
+      password: $2a$12$cEDcchID3ErUi3JbwscbbuUZBKr8NZCLYDS.Llf/9CiiTbpwepIQC # Jelszó
+
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver #a mysql driver osztalya
-    url: jdbc:mysql://localhost:3306/chatapp?useSSL=false&allowPublicKeyRetrieval=true #a mysql url-je, ide jon a port es az adatbazis neve is 
-    username: root #a mysql felhasznaloneve
-    password: 50ReszeltAlma #a mysql jelszava
+    driver-class-name: com.mysql.cj.jdbc.Driver # A MySQL driver osztálya
+    url: jdbc:mysql://localhost:3306/chatapp?useSSL=false&allowPublicKeyRetrieval=true # A MySQL URL-je
+    username: root # A MySQL felhasználóneve
+    password: 50ReszeltAlma # A MySQL jelszava
+
   jpa:
-    show-sql: true #a sql lekerdezesek megjelenitese
+    show-sql: true # A SQL lekérdezések megjelenítése
     database: mysql
-    database-platform: org.hibernate.dialect.MySQL8Dialect #a mysql dialect-je
+    database-platform: org.hibernate.dialect.MySQL8Dialect # A MySQL dialect-je
     hibernate:
-      ddl-auto: update  #a tablak letrehozasa automatikusan tortenik meg 
+      ddl-auto: update # A táblák létrehozása automatikusan történik
+
   jackson:
     serialization:
       FAIL_ON_EMPTY_BEANS: false
+
 logging:  
   level:
     root: info

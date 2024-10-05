@@ -11,17 +11,31 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
-            .cors(cors -> cors.disable())
-            .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/user/register").permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults())
-            .formLogin(formLogin -> formLogin.disable());
-        return http.build();
-    }
+//    @Bean
+//    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        http.csrf(csrf -> csrf.disable())
+//            .cors(cors -> cors.disable())
+//            .authorizeHttpRequests(authorize -> authorize
+//                .requestMatchers("/user/register").permitAll()
+//                .anyRequest().authenticated()
+//            )
+//            .httpBasic(Customizer.withDefaults())
+//            .formLogin(formLogin -> formLogin.disable());
+//        return http.build();
+//    }
+	
+	@Bean
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	    http.csrf(csrf -> csrf.disable())
+	        .cors(cors -> cors.disable())
+	        .authorizeHttpRequests(authorize -> authorize
+	            .requestMatchers("/user/register", "/message/**").permitAll()  // Engedélyezett endpointok
+	            .anyRequest().authenticated()
+	        )
+	        .httpBasic(Customizer.withDefaults())
+	        .formLogin(formLogin -> formLogin.disable());
+	    return http.build();
+	}
+
 }
 
