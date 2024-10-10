@@ -52,8 +52,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         SimpleDateFormat differentDayFormat = new SimpleDateFormat("MMM dd");
 
         SimpleDateFormat dayFormat = new SimpleDateFormat("yyyyMMdd");
-        String messageDay = dayFormat.format(messageDate);
-        String currentDay = dayFormat.format(currentDate);
+//        String messageDay = dayFormat.format(messageDate);
+//        String currentDay = dayFormat.format(currentDate);
 
         User user = getUserFromSharedPreferences();
         if (user != null) {

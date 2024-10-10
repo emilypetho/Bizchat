@@ -87,9 +87,7 @@ public class LoginActivity extends AppCompatActivity {
             idCall.enqueue(new Callback<User>() {
                 @Override
                 public void onResponse(Call<User> call, Response<User> response) {
-                    Log.e("siker",String.valueOf(response.code()));
                     if(response.isSuccessful()){
-                        Log.e("jo","jhgf");
                         SharedPreferences.Editor editor = sharedPref.edit();
                         editor.putString(MyConst.AUTH,encodedcredentials);
                         editor.putBoolean(MyConst.REMEMBER_ME,checkBox.isChecked());
@@ -102,12 +100,12 @@ public class LoginActivity extends AppCompatActivity {
                         Intent intent = new Intent(LoginActivity.this, GroupActivity.class);
                         startActivity(intent);
                     }else{
-                        textViewResult.setText("helytelen emailcin vagy jelszo");
+                        textViewResult.setText("helytelen emailcim vagy jelszo");
                     }
                 }
                 @Override
                 public void onFailure(Call<User> call, Throwable t) {
-                    Log.e("szar","jhgf");
+                    Log.e("LoginActivity","Error with login authentication");
                 }
             });
         });

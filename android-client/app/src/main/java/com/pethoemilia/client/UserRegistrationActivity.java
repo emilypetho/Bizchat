@@ -85,7 +85,7 @@ public class UserRegistrationActivity extends AppCompatActivity {
         loadCompanies();
         loadRoles();
 
-        button.setOnClickListener(new View.OnClickListener() { // beteszek egy click listenert a buttonhoz, amikor megnyomodik a gomb vegrehajtja ami a mtodusban van
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(UserRegistrationActivity.this, CompanyRegistrationActivity.class);

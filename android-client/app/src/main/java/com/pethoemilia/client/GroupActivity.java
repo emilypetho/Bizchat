@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,12 +32,14 @@ public class GroupActivity extends AppCompatActivity {
     private GroupAdapter adapter;
     private GroupClient groupClient;
     private MessageClient messageClient;
+    private Button logoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e("group","grdehbetjsrk");
+        Log.e("ellenorzes", getUserFromSharedPreferences().getEmail());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
+        logoutButton = findViewById(R.id.logout);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -80,6 +83,10 @@ public class GroupActivity extends AppCompatActivity {
             // Handle the case where user is not available
             Log.e("MainActivity2", "User not found in SharedPreferences");
         }
+        logoutButton.setOnClickListener(view -> {
+            Intent intent = new Intent(GroupActivity.this, LoginActivity.class);
+            startActivity(intent);
+        });
     }
 
     private User getUserFromSharedPreferences() {

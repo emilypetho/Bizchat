@@ -3,9 +3,9 @@ server:
 
 spring:  
   rabbitmq:
-#    host: 192.168.1.91
-#    host: 192.168.0.115
     host: 172.20.10.3
+#    host: 192.168.0.115
+#    host: 172.20.10.3
     #host: localhost
     port: 5672
     username: guest
@@ -24,6 +24,7 @@ spring:
     url: jdbc:mysql://localhost:3306/chatapp?useSSL=false&allowPublicKeyRetrieval=true # A MySQL URL-je
     username: root # A MySQL felhasználóneve
     password: 50ReszeltAlma # A MySQL jelszava
+    #password: qwertyui
 
   jpa:
     show-sql: true # A SQL lekérdezések megjelenítése
