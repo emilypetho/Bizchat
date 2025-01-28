@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,7 +41,6 @@ public class GroupActivity extends AppCompatActivity {
         Log.e("ellenorzes", getUserFromSharedPreferences().getEmail());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
-        logoutButton = findViewById(R.id.logout);
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -83,10 +84,12 @@ public class GroupActivity extends AppCompatActivity {
             // Handle the case where user is not available
             Log.e("MainActivity2", "User not found in SharedPreferences");
         }
-        logoutButton.setOnClickListener(view -> {
-            Intent intent = new Intent(GroupActivity.this, LoginActivity.class);
-            startActivity(intent);
-        });
+//        logoutButton.setOnClickListener(view -> {
+//            Intent intent = new Intent(GroupActivity.this, LoginActivity.class);
+//            startActivity(intent);
+//        });
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 
     private User getUserFromSharedPreferences() {
@@ -187,4 +190,47 @@ public class GroupActivity extends AppCompatActivity {
         editor.putString(MyConst.GROUP, groupJson);
         editor.apply(); // Adatok elmentése
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        if (id == R.id.action_new_chat) {
+            Intent intent = new Intent(this, NewChatActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_new_group) {
+            Intent intent = new Intent(this, NewGroupActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        } else if (id == R.id.action_logout) {
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+//    private void logout() {
+//        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sharedPreferences.edit();
+//        editor.clear();
+//        editor.apply();
+//
+//        Intent intent = new Intent(this, LoginActivity.class);
+//        startActivity(intent);
+//        finish();
+//    }
+
 }

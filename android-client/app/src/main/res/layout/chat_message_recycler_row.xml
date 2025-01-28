@@ -19,7 +19,7 @@
             android:id="@+id/chat_sender_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+
             android:textSize="10sp"
             android:layout_marginBottom="4dp" />
 
@@ -34,7 +34,7 @@
                 android:id="@+id/receiver_chat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -43,7 +43,7 @@
             android:id="@+id/chat_time_receiver"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
+
             android:textSize="10sp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"/>
@@ -70,7 +70,7 @@
                 android:id="@+id/sender_chat"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/white"
+
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -80,7 +80,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textColor="@color/white"
+
             android:textSize="10sp"
             android:layout_gravity="end" />
     </LinearLayout>

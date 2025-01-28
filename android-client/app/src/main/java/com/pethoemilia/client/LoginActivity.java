@@ -17,6 +17,8 @@ import com.google.gson.Gson;
 import com.pethoemilia.client.api.UserClient;
 import com.pethoemilia.client.entity.User;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -68,8 +70,17 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(view -> {
             String email = emailEditText.getText().toString();
             String password = passwordEditText.getText().toString();
+//            String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+//            Log.d("HashedPassword", hashedPassword);
+//
+//            String encoded = Base64.encodeToString((email + ":" + hashedPassword).getBytes(), Base64.NO_WRAP);
+//            String encodedcredentials = "Basic " + encoded;
+
             String encoded = Base64.encodeToString((email + ":" + password).getBytes(), Base64.NO_WRAP);
             String encodedcredentials = "Basic " + encoded;
+
+            Log.d("EncodedCredentials", encodedcredentials);
+            Log.d("Email", email);
             SharedPreferences sharedPref = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
 
             if (email.isEmpty()) {
