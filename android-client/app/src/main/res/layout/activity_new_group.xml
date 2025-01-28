@@ -1,30 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Csoport név mező -->
     <EditText
         android:id="@+id/editTextGroupName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Csoport neve" />
+        android:hint="Csoport név"
+        android:inputType="text" />
 
-    <EditText
-        android:id="@+id/editTextUserId1"
+    <!-- Felhasználók hozzáadásához -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Felhasználó ID 1" />
+        android:text="Felhasználók"
+        android:textSize="16sp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp" />
 
-    <EditText
-        android:id="@+id/editTextUserId2"
+    <!-- Felhasználói e-mail címek inputjai -->
+    <LinearLayout
+        android:id="@+id/linearLayoutUserId"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Felhasználó ID 2" />
+        android:orientation="vertical"
+        android:paddingBottom="16dp">
 
+        <!-- Alapértelmezett felhasználó input mező -->
+        <EditText
+            android:id="@+id/editTextUserId"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Felhasználó e-mail"
+            android:inputType="textEmailAddress" />
+
+    </LinearLayout>
+
+    <!-- Gomb, amely új felhasználó inputot ad hozzá -->
+    <Button
+        android:id="@+id/buttonAddUser"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Új felhasználó hozzáadása" />
+
+    <!-- Csoport létrehozásához -->
     <Button
         android:id="@+id/buttonCreateGroup"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Csoport létrehozása" />
+        android:text="Csoport létrehozása"
+        android:layout_marginTop="16dp" />
+
 </LinearLayout>
