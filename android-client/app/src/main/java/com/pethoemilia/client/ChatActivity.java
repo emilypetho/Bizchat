@@ -58,7 +58,42 @@ public class ChatActivity extends AppCompatActivity {
         messageClient = retrofit.create(MessageClient.class);
 
         Group group = getGroupFromSharedPreferences();
-        chatNameTextView.setText(group.getName());
+
+
+        //chatNameTextView.setText(group.getName());
+
+
+//        if (group != null) {
+//            User currentUser = getUserFromSharedPreferences();
+//            if (group.getUsers() != null && !group.getUsers().isEmpty()) {
+//                for (User member : group.getUsers()) {
+//                    if (!member.getId().equals(currentUser.getId())) {
+//                        chatNameTextView.setText(member.getName());
+//                        break;
+//                    }
+//                }
+//            } else {
+//                chatNameTextView.setText("No members in the group");
+//            }
+//        } else {
+//            Log.e("ChatActivity", "Group not found in SharedPreferences");
+//        }
+
+        if (group != null) {
+            User currentUser = getUserFromSharedPreferences();
+            if (group.getUsers().size() == 2) {
+                for (User member : group.getUsers()) {
+                    if (!member.getId().equals(currentUser.getId())) {
+                        chatNameTextView.setText(member.getName());
+                        break;
+                    }
+                }
+            } else {
+                chatNameTextView.setText(group.getName());
+            }
+        } else {
+            Log.e("ChatActivity", "Group not found in SharedPreferences");
+        }
 
         loadMessagesForGroup(group.getId());
 

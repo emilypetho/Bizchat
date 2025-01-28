@@ -18,7 +18,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver # A MySQL driver osztálya
-    url: jdbc:mysql://localhost:3306/bizchat?useSSL=false&allowPublicKeyRetrieval=true # A MySQL URL-je
+    url: jdbc:mysql://localhost:3306/proba?useSSL=false&allowPublicKeyRetrieval=true # A MySQL URL-je
     username: root # A MySQL felhasználóneve
     password: 50ReszeltAlma # A MySQL jelszava
     #password: qwertyui

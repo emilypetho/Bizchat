@@ -16,6 +16,8 @@ public class Group {
     private Set<User> users = new HashSet<>();
     private List<Message> messages = new ArrayList<>();
 
+    private Boolean isGroup;
+
     // Constructor, getters, and setters omitted for brevity
 
     public String lastMessage() {
@@ -80,5 +82,13 @@ public class Group {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Boolean getFlag() {
+        return isGroup;
+    }
+
+    public void setFlag(Boolean group) {
+        isGroup = group;
     }
 }

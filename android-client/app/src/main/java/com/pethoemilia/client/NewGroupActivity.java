@@ -169,6 +169,7 @@ public class NewGroupActivity extends AppCompatActivity {
         userSet.addAll(users);      // Add the fetched users
 
         newGroup.setUsers(userSet);
+        newGroup.setFlag(true);
 
         GroupClient groupClient = new Retrofit.Builder()
                 .baseUrl(MyConst.URL)

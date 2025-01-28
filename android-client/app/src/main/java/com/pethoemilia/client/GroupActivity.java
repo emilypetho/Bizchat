@@ -67,6 +67,40 @@ public class GroupActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(adapter);
 
+        Group group = getGroupFromSharedPreferences();
+        if (group != null) {
+            User currentUser = getUserFromSharedPreferences();
+            if (group.getUsers().size() == 2) {
+                for (User member : group.getUsers()) {
+                    if (!member.getId().equals(currentUser.getId())) {
+                        adapter.setUser(member);
+                        break;
+                    }
+                }
+            }
+        } else {
+            Log.e("ChatActivity", "Group not found in SharedPreferences");
+        }
+
+//        Group group = getGroupFromSharedPreferences();
+//        //chatNameTextView.setText(group.getName());
+//        if (group != null) {
+//            User currentUser = getUserFromSharedPreferences();
+//            if (group.getUsers() != null && !group.getUsers().isEmpty()) {
+//                for (User member : group.getUsers()) {
+//                    if (!member.getId().equals(currentUser.getId())) {
+//                        //chatNameTextView.setText(member.getName());
+//                        adapter.setUser(member);
+//                        break;
+//                    }
+//                }
+//            } else {
+//                //chatNameTextView.setText("No members in the group");
+//            }
+//        } else {
+//            Log.e("ChatActivity", "Group not found in SharedPreferences");
+//        }
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(MyConst.URL) // Backend base URL
                 .addConverterFactory(GsonConverterFactory.create())
@@ -90,6 +124,13 @@ public class GroupActivity extends AppCompatActivity {
 //        });
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+    }
+
+    private Group getGroupFromSharedPreferences() {
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        String groupJson = sharedPreferences.getString(MyConst.GROUP, null);
+        Gson gson = new Gson();
+        return gson.fromJson(groupJson, Group.class);
     }
 
     private User getUserFromSharedPreferences() {

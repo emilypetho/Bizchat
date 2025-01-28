@@ -45,4 +45,7 @@ public class Group {
 			CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE })
 	@JsonIgnore
 	private List<Message> messages;
+
+	@Column(nullable = false)
+	private boolean isGroup;
 }
