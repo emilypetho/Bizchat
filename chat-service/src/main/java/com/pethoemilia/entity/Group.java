@@ -46,6 +46,6 @@ public class Group {
 	@JsonIgnore
 	private List<Message> messages;
 
-	@Column(nullable = false)
-	private boolean isGroup;
+//	@Column(nullable = false)
+//	private boolean isGroup;
 }

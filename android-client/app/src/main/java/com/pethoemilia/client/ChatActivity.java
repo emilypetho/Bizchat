@@ -81,7 +81,7 @@ public class ChatActivity extends AppCompatActivity {
 
         if (group != null) {
             User currentUser = getUserFromSharedPreferences();
-            if (group.getUsers().size() == 2) {
+            if (group.getUsers().size() == 2) {//&& !group.getName().equal("Chat")//TODO
                 for (User member : group.getUsers()) {
                     if (!member.getId().equals(currentUser.getId())) {
                         chatNameTextView.setText(member.getName());

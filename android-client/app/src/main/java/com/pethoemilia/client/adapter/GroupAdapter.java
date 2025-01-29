@@ -25,7 +25,7 @@ import java.util.List;
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHolder> {
 
     private List<Group> groups = new ArrayList<>();
-    private User user;
+    private User user = new User();
 
     public User getUser() {
         return user;
@@ -68,8 +68,18 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
 //            }
 //        }
 
-        if (group.getUsers().size() == 2) {
-            holder.groupName.setText(user.getName());
+//        if (group.getUsers().size() == 2) {
+//            holder.groupName.setText(user.getName());
+////            Log.e("ize",user.getName());
+//        }else{holder.groupName.setText(group.getName());}
+
+        if (group.getUsers().size() == 2) {//&& !group.getName().equal("Chat")//TODO
+            for (User member : group.getUsers()) {
+                if (!member.getId().equals(user.getId())) {
+                    holder.groupName.setText(member.getName());
+                    break;
+                }
+            }
         }else{holder.groupName.setText(group.getName());}
 
         if (group.getMessages() != null && !group.getMessages().isEmpty()) {

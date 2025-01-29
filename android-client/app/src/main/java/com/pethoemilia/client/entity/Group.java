@@ -16,7 +16,7 @@ public class Group {
     private Set<User> users = new HashSet<>();
     private List<Message> messages = new ArrayList<>();
 
-    private Boolean isGroup;
+//    private Boolean isGroup;
 
     // Constructor, getters, and setters omitted for brevity
 
@@ -84,11 +84,11 @@ public class Group {
         this.id = id;
     }
 
-    public Boolean getFlag() {
-        return isGroup;
-    }
+//    public Boolean getFlag() {
+//        return isGroup;
+//    }
 
-    public void setFlag(Boolean group) {
-        isGroup = group;
-    }
+//    public void setFlag(Boolean group) {
+//        isGroup = group;
+//    }
 }

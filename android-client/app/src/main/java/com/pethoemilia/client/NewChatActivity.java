@@ -134,7 +134,7 @@ public class NewChatActivity extends AppCompatActivity {
         users.add(user1);
 
         newGroup.setUsers(users);
-        newGroup.setFlag(false);
+//        newGroup.setFlag(false);
         GroupClient groupClient = new Retrofit.Builder()
                 .baseUrl(MyConst.URL)
                 .addConverterFactory(GsonConverterFactory.create())

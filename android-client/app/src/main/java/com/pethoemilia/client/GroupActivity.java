@@ -65,22 +65,26 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
-        recyclerView.setAdapter(adapter);
+        //recyclerView.setAdapter(adapter);
 
-        Group group = getGroupFromSharedPreferences();
-        if (group != null) {
-            User currentUser = getUserFromSharedPreferences();
-            if (group.getUsers().size() == 2) {
-                for (User member : group.getUsers()) {
-                    if (!member.getId().equals(currentUser.getId())) {
-                        adapter.setUser(member);
-                        break;
-                    }
-                }
-            }
-        } else {
-            Log.e("ChatActivity", "Group not found in SharedPreferences");
-        }
+//        Group group = getGroupFromSharedPreferences();
+//        if (group != null) {
+//            User currentUser = getUserFromSharedPreferences();
+//            if (group.getUsers().size() == 2) {
+//                for (User member : group.getUsers()) {
+//                    if (!member.getId().equals(currentUser.getId())) {
+//                        adapter.setUser(member);
+//                        break;
+//                    }
+//                }
+//            }
+//        } else {
+//            Log.e("ChatActivity", "Group not found in SharedPreferences");
+//        }
+
+        User currentUser = getUserFromSharedPreferences();
+        adapter.setUser(currentUser);
+        recyclerView.setAdapter(adapter);
 
 //        Group group = getGroupFromSharedPreferences();
 //        //chatNameTextView.setText(group.getName());
