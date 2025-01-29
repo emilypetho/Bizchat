@@ -3,16 +3,19 @@ package com.pethoemilia.client;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.pethoemilia.client.ViewModel.ChatViewModel;
 import com.pethoemilia.client.adapter.ChatAdapter;
 import com.pethoemilia.client.api.MessageClient;
 import com.pethoemilia.client.entity.Group;
@@ -36,6 +39,20 @@ public class ChatActivity extends AppCompatActivity {
     private EditText editTextMessage;
     private Button buttonSend;
 
+    private ChatViewModel chatViewModel;
+
+    private Handler handler = new Handler();
+    private Runnable refreshMessagesTask = new Runnable() {
+        @Override
+        public void run() {
+            Group group = getGroupFromSharedPreferences();
+            if (group != null) {
+                loadMessagesForGroup(group.getId());  // Frissíti az üzeneteket
+            }
+            handler.postDelayed(this, 5000); // 5 másodpercenként újrahívás
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,31 +74,13 @@ public class ChatActivity extends AppCompatActivity {
 
         messageClient = retrofit.create(MessageClient.class);
 
+        // Inicializáljuk a ViewModelt
+        chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
+
         Group group = getGroupFromSharedPreferences();
-
-
-        //chatNameTextView.setText(group.getName());
-
-
-//        if (group != null) {
-//            User currentUser = getUserFromSharedPreferences();
-//            if (group.getUsers() != null && !group.getUsers().isEmpty()) {
-//                for (User member : group.getUsers()) {
-//                    if (!member.getId().equals(currentUser.getId())) {
-//                        chatNameTextView.setText(member.getName());
-//                        break;
-//                    }
-//                }
-//            } else {
-//                chatNameTextView.setText("No members in the group");
-//            }
-//        } else {
-//            Log.e("ChatActivity", "Group not found in SharedPreferences");
-//        }
-
         if (group != null) {
             User currentUser = getUserFromSharedPreferences();
-            if (group.getUsers().size() == 2) {//&& !group.getName().equal("Chat")//TODO
+            if (group.getUsers().size() == 2) {
                 for (User member : group.getUsers()) {
                     if (!member.getId().equals(currentUser.getId())) {
                         chatNameTextView.setText(member.getName());
@@ -95,9 +94,27 @@ public class ChatActivity extends AppCompatActivity {
             Log.e("ChatActivity", "Group not found in SharedPreferences");
         }
 
-        loadMessagesForGroup(group.getId());
+        // Figyelünk az üzenetek változására
+        chatViewModel.getMessages().observe(this, messages -> {
+            adapter.setMessages(messages);
+            recyclerView.scrollToPosition(adapter.getItemCount() - 1); // Mindig az utolsó üzenetre ugrik
+        });
+
+        loadMessagesForGroup(group != null ? group.getId() : 0L);
 
         buttonSend.setOnClickListener(v -> sendMessage());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handler.postDelayed(refreshMessagesTask, 5000); // Indítás, amikor az Activity elérhető
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        handler.removeCallbacks(refreshMessagesTask); // Leállítja a pollingot
     }
 
     private User getUserFromSharedPreferences() {
@@ -113,8 +130,8 @@ public class ChatActivity extends AppCompatActivity {
     private Group getGroupFromSharedPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         String groupJson = sharedPreferences.getString(MyConst.GROUP, null);
-            Gson gson = new Gson();
-            return gson.fromJson(groupJson, Group.class);
+        Gson gson = new Gson();
+        return gson.fromJson(groupJson, Group.class);
     }
 
     private void sendMessage() {
@@ -125,7 +142,7 @@ public class ChatActivity extends AppCompatActivity {
             Group group = getGroupFromSharedPreferences();
             User sender = getUserFromSharedPreferences();
             if (sender != null) {
-                Call<Message> call = messageClient.save(new Message(messageContent,group,sender),encodedcredentials);
+                Call<Message> call = messageClient.save(new Message(messageContent, group, sender), encodedcredentials);
                 call.enqueue(new Callback<Message>() {
                     @Override
                     public void onResponse(Call<Message> call, Response<Message> response) {
@@ -143,7 +160,6 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
             } else {
-                // Handle the case where user is not available
                 Log.e("MainActivity2", "User not found in SharedPreferences");
             }
         }
@@ -152,15 +168,14 @@ public class ChatActivity extends AppCompatActivity {
     private void loadMessagesForGroup(Long groupId) {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
-        Call<List<Message>> call = messageClient.findByGroupId(groupId,encodedcredentials);
+        Call<List<Message>> call = messageClient.findByGroupId(groupId, encodedcredentials);
         call.enqueue(new Callback<List<Message>>() {
             @Override
             public void onResponse(Call<List<Message>> call, Response<List<Message>> response) {
                 if (response.isSuccessful()) {
                     List<Message> messages = response.body();
                     if (messages != null) {
-                        adapter.setMessages(messages);
-                        recyclerView.scrollToPosition(adapter.getItemCount() - 1); // Scroll to the last message
+                        chatViewModel.setMessages(messages);
                     }
                 } else {
                     Log.e("ChatActivity", "API error: " + response.message());

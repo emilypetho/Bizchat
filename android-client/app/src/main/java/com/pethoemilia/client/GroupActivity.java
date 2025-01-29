@@ -21,6 +21,7 @@ import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
+import java.util.HashSet;
 import java.util.List;
 
 import retrofit2.Call;
@@ -35,6 +36,8 @@ public class GroupActivity extends AppCompatActivity {
     private GroupClient groupClient;
     private MessageClient messageClient;
     private Button logoutButton;
+
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,7 +117,7 @@ public class GroupActivity extends AppCompatActivity {
         messageClient = retrofit.create(MessageClient.class);
 
         // Load user from SharedPreferences
-        User user = getUserFromSharedPreferences();
+        user = getUserFromSharedPreferences();
         if (user != null) {
             long userId = user.getId();
             loadGroups(userId);
@@ -146,7 +149,6 @@ public class GroupActivity extends AppCompatActivity {
         }
         return null;
     }
-
     private void loadGroups(long userId) {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
@@ -161,6 +163,10 @@ public class GroupActivity extends AppCompatActivity {
                         for (Group group : groups) {
                             loadMessagesForGroup(group.getId());
                         }
+                        // Rendezés az utolsó üzenet szerint
+                        user.sortGroupsByLastMessage();
+                        adapter.setGroups(groups);  // Az adapter frissítése a rendezett csoportokkal
+                        recyclerView.setAdapter(adapter);  // Adapter beállítása
                     }
                 } else {
                     Log.e("Group","load group♥h "+response);
@@ -177,7 +183,6 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
     }
-
     private void loadMessagesForGroup(Long groupId) {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
@@ -195,7 +200,8 @@ public class GroupActivity extends AppCompatActivity {
                                 break;
                             }
                         }
-                        adapter.notifyDataSetChanged(); // Update adapter
+                        user.sortGroupsByLastMessage();
+                        adapter.notifyDataSetChanged();
                     }
                 } else {
                     // Handle API errors
