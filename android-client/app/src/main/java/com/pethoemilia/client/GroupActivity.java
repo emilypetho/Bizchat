@@ -20,6 +20,7 @@ import com.pethoemilia.client.api.MessageClient;
 import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
+import com.pethoemilia.client.service.RefreshService;
 
 import java.util.HashSet;
 import java.util.List;
@@ -131,6 +132,7 @@ public class GroupActivity extends AppCompatActivity {
 //        });
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        startService(new Intent(this, RefreshService.class));
     }
 
     private Group getGroupFromSharedPreferences() {

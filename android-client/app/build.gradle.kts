@@ -52,4 +52,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.jbcrypt)
+    implementation("com.rabbitmq:amqp-client:5.21.0")
+
 }
