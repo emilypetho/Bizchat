@@ -11,17 +11,16 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.pethoemilia.client.GroupActivity;
-import com.pethoemilia.client.LoginActivity;
 import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.R;
 import com.pethoemilia.client.api.GroupClient;
@@ -31,7 +30,6 @@ import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,151 +53,120 @@ public class RefreshService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        configureRabbit();
+        thread = new Thread(() -> {
+            try {
+                ConnectionFactory factory = new ConnectionFactory();
+                factory.setUsername("guest");
+                factory.setPassword("guest");
+                factory.setHost(MyConst.RABBIT_PORT);
+                factory.setPort(5672);
+                Connection conn = factory.newConnection();
+                boolean autoAck = false;
+                Channel channel = conn.createChannel();
+                Retrofit retrofit = new Retrofit.Builder()
+                        .baseUrl(MyConst.URL)
+                        .addConverterFactory(GsonConverterFactory.create())
+                        .build();
+
+                groupClient = retrofit.create(GroupClient.class);
+                SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+                String userJson = sharedPreferences.getString(MyConst.USER, null);
+
+                if (userJson != null) {
+                    Gson gson = new Gson();
+                    User user = gson.fromJson(userJson, User.class);
+
+                    if (user != null) {
+                        loadGroups(user.getId(), groups -> {
+                            if (groups != null) {
+                                groupk = groups;
+                                for (Group g : groupk) {
+                                    Log.d("RabbitMQ", "sima for: " + g.getName());
+                                }
+
+                                new Thread(() -> {
+                                    try {
+                                        for (Group group : groupk) {
+                                            Log.d("RabbitMQ", "kkkkkkkkkkkkkkk: " + group.getName());
+                                            channel.queueBind("chatQueue", "newMessageExchange", group.getName());
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e("RabbitMQ", "itt volt baj", e);
+                                    }
+
+                                    try {
+                                        channel.basicConsume("chatQueue", autoAck, "chatQueue",
+                                                new DefaultConsumer(channel) {
+                                                    @Override
+                                                    public void handleDelivery(String consumerTag, Envelope envelope,
+                                                                               AMQP.BasicProperties properties, byte[] body)
+                                                            throws IOException {
+                                                        long deliveryTag = envelope.getDeliveryTag();
+                                                        sendMessage(new String(body, StandardCharsets.UTF_8));
+                                                        Log.d("uzenet", new String(body, StandardCharsets.UTF_8));
+                                                        channel.basicAck(deliveryTag, false);
+                                                    }
+                                                });
+                                    } catch (Exception e) {
+                                        Log.e("RabbitMQ", "Error in consuming messages", e);
+                                    }
+                                }).start();
+                            } else {
+                                Log.e("RabbitMQ", "Group list is null");
+                            }
+                        });
+                    } else {
+                        Log.e("RefreshService", "User is null");
+                    }
+                } else {
+                    Log.e("RefreshService", "User JSON is null");
+                }
+            } catch (Exception e) {
+                Log.e("RabbitMQ", "Error in queue setup", e);
+            }
+        });
+        thread.start();
         return super.onStartCommand(intent, flags, startId);
+
     }
-
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-//        String userJson = sharedPreferences.getString(MyConst.USER, null);
-//
-//        if (userJson != null) {
-//            Gson gson = new Gson();
-//            User user = gson.fromJson(userJson, User.class);
-//
-//            if (user != null) {
-//                long userId = user.getId();
-//
-//                loadGroups(userId, new GroupCallback() {
-//                    @Override
-//                    public void onGroupsLoaded(List<Group> groups) {
-//                        for (Group group : groups) {
-//                            Log.d("Groups", "Group: " + group.getName());
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable error) {
-//                        Log.e("Groups", "Error loading groups", error);
-//                    }
-//                });
-//            } else {
-//                Log.e("RefreshService", "User not found");
-//            }
-//        }
-//
-//        return super.onStartCommand(intent, flags, startId);
-//    }
-
 
     @Override
     public void onDestroy() {
         thread.interrupt();
         super.onDestroy();
-
     }
 
-    private void configureRabbit() {
-        thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ConnectionFactory factory = new ConnectionFactory();
-                    factory.setUsername("guest");
-                    factory.setPassword("guest");
-                    //factory.setVirtualHost("/");
-                    factory.setHost(MyConst.RABBIT_PORT);
-                    factory.setPort(5672);
-                    Connection conn = factory.newConnection();
-                    boolean autoAck = false;
-                    Channel channel = conn.createChannel();
-                    Retrofit retrofit = new Retrofit.Builder()
-                            .baseUrl(MyConst.URL) // Backend base URL
-                            .addConverterFactory(GsonConverterFactory.create())
-                            .build();
-
-                    groupClient = retrofit.create(GroupClient.class);
-
-                    SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-                    String userJson = sharedPreferences.getString(MyConst.USER, null);
-
-                    if (userJson != null) {
-                        Gson gson = new Gson();
-                        User user = gson.fromJson(userJson, User.class);
-                    loadGroups(user.getId());
-                    }
-                    //channel.queueBind("chatQueue", "newMessageExchange", severity);
-                    for(Group g:groupk){
-                        Log.d("RabbitMQ", "Error in queue binding:"+g.getName());
-                    }
-                    for (Group group : groupk) {
-                        channel.queueBind("chatQueue", "newMessageExchange", group.getName());
-                    }
-                    channel.basicConsume("chatQueue", autoAck, "chatQueue",
-                            new DefaultConsumer(channel) {
-                                @Override
-                                public void handleDelivery(String consumerTag,
-                                                           Envelope envelope,
-                                                           AMQP.BasicProperties properties,
-                                                           byte[] body)
-                                        throws IOException {
-
-                                    long deliveryTag = envelope.getDeliveryTag();
-                                    sendMessage(new String(body));
-                                    Log.d("uzenet", Arrays.toString(body));
-                                    channel.basicAck(deliveryTag, false);
-                                }
-                            });
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.e("RabbitMQ", "Error in queue binding: ", e);
-                }
-            }
-        });
-
-        thread.start();
-    }
-
-//    public interface GroupCallback {
-//        void onGroupsLoaded(List<Group> groups);
-//        void onError(Throwable error);
-//    }
-
-    private void loadGroups(long userId) {
+    private void loadGroups(long userId, GroupCallback callback) {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-        String encodedcredentials = sharedPreferences.getString(MyConst.AUTH, null);
+        String encodedCredentials = sharedPreferences.getString(MyConst.AUTH, null);
 
-        Call<List<Group>> call = groupClient.findByUserId(userId, encodedcredentials);
+        Call<List<Group>> call = groupClient.findByUserId(userId, encodedCredentials);
         call.enqueue(new Callback<List<Group>>() {
             @Override
             public void onResponse(Call<List<Group>> call, Response<List<Group>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    groupk = response.body();
+                    callback.onGroupsLoaded(response.body());
+                } else {
+                    callback.onGroupsLoaded(Collections.emptyList());
                 }
             }
 
             @Override
             public void onFailure(Call<List<Group>> call, Throwable t) {
-                //
+                callback.onGroupsLoaded(Collections.emptyList());
+                Log.e("loadGroups", "Failed to fetch groups", t);
             }
         });
     }
 
+    interface GroupCallback {
+        void onGroupsLoaded(List<Group> groups);
+    }
 
     private void sendMessage(String message) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(RefreshService.this.getApplicationContext(), message, Toast.LENGTH_SHORT).show());
 
-            @Override
-            public void run() {
-                Toast.makeText(RefreshService.this.getApplicationContext(), message, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        /*if (isAppRunning(this, "com.pethoemilia.client")) {
-            return;
-        }*/
         Intent intent = new Intent(this, GroupActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
@@ -216,19 +183,5 @@ public class RefreshService extends Service {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
             notificationManager.notify(404, builder.build());
         }
-    }
-
-    public static boolean isAppRunning(final Context context, final String packageName) {
-        final ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-        final List<ActivityManager.RunningAppProcessInfo> procInfos = activityManager.getRunningAppProcesses();
-        if (procInfos != null)
-        {
-            for (final ActivityManager.RunningAppProcessInfo processInfo : procInfos) {
-                if (processInfo.processName.equals(packageName)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }

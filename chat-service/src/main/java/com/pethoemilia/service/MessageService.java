@@ -22,7 +22,7 @@ public class MessageService {
 //	}
 
 	private final IMessageRepository messageRepo;
-	private final RabbitTemplate rabbitTemplate; // Add RabbitTemplate
+	private final RabbitTemplate rabbitTemplate;
 	private final TopicExchange exchange;
 
 	public Message save(Message message) {
