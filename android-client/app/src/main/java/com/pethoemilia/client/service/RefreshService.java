@@ -20,6 +20,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.pethoemilia.client.GroupActivity;
 import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.R;
@@ -88,7 +89,7 @@ public class RefreshService extends Service {
                                     try {
                                         for (Group group : groupk) {
                                             Log.d("RabbitMQ", "kkkkkkkkkkkkkkk: " + group.getName());
-                                            channel.queueBind("chatQueue", "newMessageExchange", group.getName());
+                                            channel.queueBind("chatQueue", "newMessageExchange",group.getName() );
                                         }
                                     } catch (Exception e) {
                                         Log.e("RabbitMQ", "itt volt baj", e);
@@ -164,24 +165,41 @@ public class RefreshService extends Service {
     }
 
     private void sendMessage(String message) {
-        new Handler(Looper.getMainLooper()).post(() ->
-                Toast.makeText(RefreshService.this.getApplicationContext(), message, Toast.LENGTH_SHORT).show());
+        try {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
 
-        Intent intent = new Intent(this, GroupActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+            String senderName = jsonObject.has("sender") && jsonObject.getAsJsonObject("sender").has("name")
+                    ? jsonObject.getAsJsonObject("sender").get("name").getAsString()
+                    : "Ismeretlen";
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
-                .setSmallIcon(R.drawable.done_icon)
-                .setContentTitle("Ertesites teeee")
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
+            String content = jsonObject.has("content")
+                    ? jsonObject.get("content").getAsString()
+                    : "N/A";
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(404, builder.build());
+            String notificationText = senderName + ": " + content;
+
+            new Handler(Looper.getMainLooper()).post(() ->
+                    Toast.makeText(RefreshService.this.getApplicationContext(), notificationText, Toast.LENGTH_SHORT).show());
+
+            Intent intent = new Intent(this, GroupActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
+                    .setSmallIcon(R.drawable.done_icon)
+                    .setContentTitle("BizChat")
+                    .setContentText(notificationText)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true);
+
+            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                notificationManager.notify(404, builder.build());
+            }
+        } catch (Exception e) {
+            Log.e("sendMessage", "Hiba az üzenet feldolgozásában", e);
         }
     }
 }
