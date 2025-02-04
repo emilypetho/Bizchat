@@ -69,45 +69,9 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
-        //recyclerView.setAdapter(adapter);
-
-//        Group group = getGroupFromSharedPreferences();
-//        if (group != null) {
-//            User currentUser = getUserFromSharedPreferences();
-//            if (group.getUsers().size() == 2) {
-//                for (User member : group.getUsers()) {
-//                    if (!member.getId().equals(currentUser.getId())) {
-//                        adapter.setUser(member);
-//                        break;
-//                    }
-//                }
-//            }
-//        } else {
-//            Log.e("ChatActivity", "Group not found in SharedPreferences");
-//        }
-
         User currentUser = getUserFromSharedPreferences();
         adapter.setUser(currentUser);
         recyclerView.setAdapter(adapter);
-
-//        Group group = getGroupFromSharedPreferences();
-//        //chatNameTextView.setText(group.getName());
-//        if (group != null) {
-//            User currentUser = getUserFromSharedPreferences();
-//            if (group.getUsers() != null && !group.getUsers().isEmpty()) {
-//                for (User member : group.getUsers()) {
-//                    if (!member.getId().equals(currentUser.getId())) {
-//                        //chatNameTextView.setText(member.getName());
-//                        adapter.setUser(member);
-//                        break;
-//                    }
-//                }
-//            } else {
-//                //chatNameTextView.setText("No members in the group");
-//            }
-//        } else {
-//            Log.e("ChatActivity", "Group not found in SharedPreferences");
-//        }
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(MyConst.URL) // Backend base URL
@@ -165,10 +129,9 @@ public class GroupActivity extends AppCompatActivity {
                         for (Group group : groups) {
                             loadMessagesForGroup(group.getId());
                         }
-                        // Rendezés az utolsó üzenet szerint
                         user.sortGroupsByLastMessage();
-                        adapter.setGroups(groups);  // Az adapter frissítése a rendezett csoportokkal
-                        recyclerView.setAdapter(adapter);  // Adapter beállítása
+                        adapter.setGroups(groups);
+                        recyclerView.setAdapter(adapter);
                     }
                 } else {
                     Log.e("Group","load group♥h "+response);
