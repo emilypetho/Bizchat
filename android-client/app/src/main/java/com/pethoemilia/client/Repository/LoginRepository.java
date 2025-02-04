@@ -1,6 +1,5 @@
 package com.pethoemilia.client.Repository;
 import android.util.Base64;
-import android.util.Log;
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -11,16 +10,15 @@ import com.pethoemilia.client.entity.User;
 
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class Repo {
-    private static Repo instance;
+public class LoginRepository {
+    private static LoginRepository instance;
     private UserClient userClient;
     private SharedPreferences sharedPref;
 
-    private Repo(Context context) {
+    private LoginRepository(Context context) {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(MyConst.URL)
                 .addConverterFactory(GsonConverterFactory.create())
@@ -29,9 +27,9 @@ public class Repo {
         sharedPref = context.getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
     }
 
-    public static Repo getInstance(Context context) {
+    public static LoginRepository getInstance(Context context) {
         if (instance == null) {
-            instance = new Repo(context);
+            instance = new LoginRepository(context);
         }
         return instance;
     }

@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.pethoemilia.client.Repository.Repo;
+import com.pethoemilia.client.Repository.LoginRepository;
 import com.pethoemilia.client.entity.User;
 
 import retrofit2.Call;
@@ -15,7 +15,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class LoginViewModel extends ViewModel {
-    private Repo userRepository;
+    private LoginRepository userRepository;
     private MutableLiveData<String> loginResult;
 
     public LoginViewModel() {
@@ -27,7 +27,7 @@ public class LoginViewModel extends ViewModel {
     }
 
     public void loginUser(Context context, String email, String password) {
-        userRepository = Repo.getInstance(context);
+        userRepository = LoginRepository.getInstance(context);
 
         if (email.isEmpty()) {
             loginResult.setValue("Email cannot be empty");
@@ -64,7 +64,7 @@ public class LoginViewModel extends ViewModel {
 
     // Betölti a felhasználót SharedPreferences-ből, ha létezik
     public User getSavedUser(Context context) {
-        userRepository = Repo.getInstance(context);
+        userRepository = LoginRepository.getInstance(context);
         return userRepository.getUserFromSharedPreferences();
     }
 }

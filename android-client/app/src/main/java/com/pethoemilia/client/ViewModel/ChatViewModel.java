@@ -1,30 +1,33 @@
 package com.pethoemilia.client.ViewModel;
 
+import android.app.Application;
+
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
+import com.pethoemilia.client.Repository.ChatRepository;
 import com.pethoemilia.client.entity.Message;
-
-import java.util.ArrayList;
 import java.util.List;
 
-public class ChatViewModel extends ViewModel {
-    private MutableLiveData<List<Message>> messages = new MutableLiveData<>(new ArrayList<>());
+public class ChatViewModel extends AndroidViewModel {
 
-    public LiveData<List<Message>> getMessages() {
+    private ChatRepository repo;
+    private MutableLiveData<List<Message>> messages;
+
+    public ChatViewModel(Application application) {
+        super(application);
+        repo = ChatRepository.getInstance(application.getApplicationContext());
+        messages = new MutableLiveData<>();
+    }
+
+    public LiveData<List<Message>> getMessages(Long groupId) {
+        // This will load messages for a specific group
+        repo.loadMessages(groupId, messages);
         return messages;
     }
 
-    public void setMessages(List<Message> newMessages) {
-        messages.setValue(newMessages);
-    }
-
-    public void addMessage(Message newMessage) {
-        List<Message> currentMessages = messages.getValue();
-        if (currentMessages != null) {
-            currentMessages.add(newMessage);
-            messages.setValue(currentMessages);
-        }
+    public void sendMessage(Message message) {
+        repo.sendMessage(message);
     }
 }
