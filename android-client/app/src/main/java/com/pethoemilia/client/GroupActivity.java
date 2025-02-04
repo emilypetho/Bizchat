@@ -42,7 +42,7 @@ public class GroupActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.e("ellenorzes", getUserFromSharedPreferences().getEmail());
+        //Log.e("ellenorzes", getUserFromSharedPreferences().getEmail());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
 

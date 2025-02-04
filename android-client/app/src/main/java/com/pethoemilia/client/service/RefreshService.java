@@ -21,6 +21,7 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 import com.pethoemilia.client.GroupActivity;
 import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.R;
@@ -179,27 +180,143 @@ public class RefreshService extends Service {
 
             String notificationText = senderName + ": " + content;
 
-            new Handler(Looper.getMainLooper()).post(() ->
-                    Toast.makeText(RefreshService.this.getApplicationContext(), notificationText, Toast.LENGTH_SHORT).show());
+            // Csoport felhasználóinak ellenőrzése
+            JsonObject group = jsonObject.getAsJsonObject("group");
+            if (group != null && group.has("users")) {
+                List<User> groupUsers = new Gson().fromJson(group.getAsJsonArray("users"), new TypeToken<List<User>>(){}.getType());
 
-            Intent intent = new Intent(this, GroupActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+                String userJson = sharedPreferences.getString(MyConst.USER, null);
+                if (userJson != null) {
+                    Gson gsonUser = new Gson();
+                    User currentUser = gsonUser.fromJson(userJson, User.class);
+                    // Ellenőrzés, hogy a felhasználó benne van-e a csoportban, és hogy nem a feladó
+                    for (User user : groupUsers) {
+                        if (currentUser.getId() == user.getId() && currentUser.getId() != jsonObject.getAsJsonObject("sender").get("id").getAsLong()) {
+                            // Ha benne van, és nem ő a feladó, akkor küldj értesítést
+                            new Handler(Looper.getMainLooper()).post(() ->
+                                    Toast.makeText(RefreshService.this.getApplicationContext(), notificationText, Toast.LENGTH_SHORT).show());
 
-            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
-                    .setSmallIcon(R.drawable.done_icon)
-                    .setContentTitle("BizChat")
-                    .setContentText(notificationText)
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true);
+                            Intent intent = new Intent(this, GroupActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
-                notificationManager.notify(404, builder.build());
+                            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
+                                    .setSmallIcon(R.drawable.done_icon)
+                                    .setContentTitle("BizChat")
+                                    .setContentText(notificationText)
+                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                                    .setContentIntent(pendingIntent)
+                                    .setAutoCancel(true);
+
+                            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+                            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                                notificationManager.notify(404, builder.build());
+                            }
+                        }
+                    }
+                }
             }
         } catch (Exception e) {
             Log.e("sendMessage", "Hiba az üzenet feldolgozásában", e);
         }
     }
+
+
+//    private void sendMessage(String message) {
+//        try {
+//            Gson gson = new Gson();
+//            JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
+//
+//            String senderName = jsonObject.has("sender") && jsonObject.getAsJsonObject("sender").has("name")
+//                    ? jsonObject.getAsJsonObject("sender").get("name").getAsString()
+//                    : "Ismeretlen";
+//
+//            String content = jsonObject.has("content")
+//                    ? jsonObject.get("content").getAsString()
+//                    : "N/A";
+//
+//            String notificationText = senderName + ": " + content;
+//
+//            // Csoport felhasználóinak ellenőrzése
+//            JsonObject group = jsonObject.getAsJsonObject("group");
+//            if (group != null && group.has("users")) {
+//                List<User> groupUsers = new Gson().fromJson(group.getAsJsonArray("users"), new TypeToken<List<User>>(){}.getType());
+//
+//                SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+//                String userJson = sharedPreferences.getString(MyConst.USER, null);
+//                if (userJson != null) {
+//                    Gson gsonUser = new Gson();
+//                    User currentUser = gsonUser.fromJson(userJson, User.class);
+//                    // Ellenőrzés, hogy a felhasználó benne van-e a csoportban
+//                    for (User user : groupUsers) {
+//                        if (currentUser.getId() == user.getId()) {
+//                            // Ha benne van, akkor küldj értesítést
+//                            new Handler(Looper.getMainLooper()).post(() ->
+//                                    Toast.makeText(RefreshService.this.getApplicationContext(), notificationText, Toast.LENGTH_SHORT).show());
+//
+//                            Intent intent = new Intent(this, GroupActivity.class);
+//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//                            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//
+//                            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
+//                                    .setSmallIcon(R.drawable.done_icon)
+//                                    .setContentTitle("BizChat")
+//                                    .setContentText(notificationText)
+//                                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                                    .setContentIntent(pendingIntent)
+//                                    .setAutoCancel(true);
+//
+//                            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//                            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+//                                notificationManager.notify(404, builder.build());
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            Log.e("sendMessage", "Hiba az üzenet feldolgozásában", e);
+//        }
+//    }
+
+
+//    private void sendMessage(String message) {
+//        try {
+//            Gson gson = new Gson();
+//            JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
+//
+//            String senderName = jsonObject.has("sender") && jsonObject.getAsJsonObject("sender").has("name")
+//                    ? jsonObject.getAsJsonObject("sender").get("name").getAsString()
+//                    : "Ismeretlen";
+//
+//            String content = jsonObject.has("content")
+//                    ? jsonObject.get("content").getAsString()
+//                    : "N/A";
+//
+//            String notificationText = senderName + ": " + content;
+//
+//            new Handler(Looper.getMainLooper()).post(() ->
+//                    Toast.makeText(RefreshService.this.getApplicationContext(), notificationText, Toast.LENGTH_SHORT).show());
+//
+//            Intent intent = new Intent(this, GroupActivity.class);
+//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//            PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//
+//            NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
+//                    .setSmallIcon(R.drawable.done_icon)
+//                    .setContentTitle("BizChat")
+//                    .setContentText(notificationText)
+//                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+//                    .setContentIntent(pendingIntent)
+//                    .setAutoCancel(true);
+//
+//            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+//            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+//                notificationManager.notify(404, builder.build());
+//            }
+//        } catch (Exception e) {
+//            Log.e("sendMessage", "Hiba az üzenet feldolgozásában", e);
+//        }
+//    }
 }

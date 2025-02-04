@@ -125,9 +125,7 @@ public class ChatActivity extends AppCompatActivity {
                     public void onResponse(Call<Message> call, Response<Message> response) {
                         if (response.isSuccessful() && response.body() != null) {
                             editTextMessage.setText("");
-                            chatViewModel.addMessage(response.body()); // Az új üzenetet hozzáadjuk a listához
-//                            RefreshService refreshService = new RefreshService();
-//                            sendMessageToQueue(response.message());
+                            chatViewModel.addMessage(response.body());
                             recyclerView.scrollToPosition(adapter.getItemCount() - 1);
                         } else {
                             Log.e("ChatActivity", "Failed to send message: " + response.message());
