@@ -57,7 +57,7 @@ public class RefreshService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         thread = new Thread(() -> {
             try {
-                ConnectionFactory factory = new ConnectionFactory();
+                ConnectionFactory factory = new ConnectionFactory();//csinalj mondjuk egy buildRabbitChanel metodust es tegyel bele mindent ami csak az inicializalashoz kell es csak a chanelt teritse vissza mert ugy latom, hogy kesobb csak az van hasznalva
                 factory.setUsername("guest");
                 factory.setPassword("guest");
                 factory.setHost(MyConst.RABBIT_PORT);
@@ -75,7 +75,7 @@ public class RefreshService extends Service {
                 String userJson = sharedPreferences.getString(MyConst.USER, null);
 
                 if (userJson != null) {
-                    Gson gson = new Gson();
+                    Gson gson = new Gson(); //Nezd meg a lenti gsonos kommentem
                     User user = gson.fromJson(userJson, User.class);
 
                     if (user != null) {
@@ -90,7 +90,7 @@ public class RefreshService extends Service {
                                     try {
                                         for (Group group : groupk) {
                                             Log.d("RabbitMQ", "kkkkkkkkkkkkkkk: " + group.getName());
-                                            channel.queueBind("chatQueue", "newMessageExchange",group.getName() );
+                                            channel.queueBind("chatQueue", "newMessageExchange",group.getName() );// a queue nevbe tegyel egy egyeni azonositot, hogy minden eszkoz mas queue nevet hasznaljon, mert hanem csak az egyik device fogja megkapni, nezz utanna, hogy hogyan tudsz egy eszkoz szint azonositot szerezni, hgoy mindig ugyanaz legyen a queue nev. Vagy amikor inditod a programot megnezed, hgoy shared preferenceba le van e mentve mondjuk egy deviceId es ha nincs generalsz neki egy uuid-t es lemented oda, es itt csak kiolvasod es hozzaadod a queue nevhez es igy ezen az eszkozon mindig ugyanaz a queue nev es eszkozonkent elter. Es csinalnek egy metodust getQueueName ami visszateriti a queue nevet es beletennem egy valtozoba es tovabb azt hasznalnam. 
                                         }
                                     } catch (Exception e) {
                                         Log.e("RabbitMQ", "itt volt baj", e);
@@ -165,16 +165,16 @@ public class RefreshService extends Service {
         void onGroupsLoaded(List<Group> groups);
     }
 
-    private void sendMessage(String message) {
+    private void sendMessage(String message) {// atneveznem sendNotificationre, ugy jobban ertheto, mert hanem azt lehet hinni, hogy uzenetet kuld a chaten keresztul.
         try {
-            Gson gson = new Gson();
+            Gson gson = new Gson(); // csinalj belole egy osztaly szintu valtozot es csak hasznald annak a pelfanyat, segit az olvashatosagon plusz kevesebb memoria kell ha csak egy peldany van. 
             JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
 
-            String senderName = jsonObject.has("sender") && jsonObject.getAsJsonObject("sender").has("name")
+            String senderName = jsonObject.has("sender") && jsonObject.getAsJsonObject("sender").has("name") // ebbol tudsz egy metodust kesziteni pl getSenderName es akkor olvashatobb lesz a kod
                     ? jsonObject.getAsJsonObject("sender").get("name").getAsString()
                     : "Ismeretlen";
 
-            String content = jsonObject.has("content")
+            String content = jsonObject.has("content") //ugyanaz mint a sender name
                     ? jsonObject.get("content").getAsString()
                     : "N/A";
 
@@ -192,7 +192,7 @@ public class RefreshService extends Service {
                     User currentUser = gsonUser.fromJson(userJson, User.class);
                     // Ellenőrzés, hogy a felhasználó benne van-e a csoportban, és hogy nem a feladó
                     for (User user : groupUsers) {
-                        if (currentUser.getId() == user.getId() && currentUser.getId() != jsonObject.getAsJsonObject("sender").get("id").getAsLong()) {
+                        if (currentUser.getId() == user.getId() && currentUser.getId() != jsonObject.getAsJsonObject("sender").get("id").getAsLong()) { // ami ezen az iffen belul van probald kiszedni egy metodusba, ugy az egesz olvashatobb lesz. Probalj beazonositani kisebb egyszegeket es csinalj egy metodust belole, olyan nevvel ami konnyen ertheto. 
                             // Ha benne van, és nem ő a feladó, akkor küldj értesítést
                             new Handler(Looper.getMainLooper()).post(() ->
                                     Toast.makeText(RefreshService.this.getApplicationContext(), notificationText, Toast.LENGTH_SHORT).show());
@@ -221,7 +221,7 @@ public class RefreshService extends Service {
             Log.e("sendMessage", "Hiba az üzenet feldolgozásában", e);
         }
     }
-
+//TODO ha gitet rendszeresen hasznalsz a regi kodot nem kell kommentben megtartani, mert a git historyban vissza tudsz menni es megnezni. Ajanlom, hogy ha ujj funkcionalitast adsz hozza a jol mukodo programhoz csinalj egy branchet, dolgozz azon es amikor megvan mergeld bele a masterba. A cegeknel is ugy dolgoznak. 
 
 //    private void sendMessage(String message) {
 //        try {
