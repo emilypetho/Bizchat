@@ -9,11 +9,16 @@ import androidx.lifecycle.MutableLiveData;
 import com.pethoemilia.client.Repository.ChatRepository;
 import com.pethoemilia.client.entity.Message;
 import java.util.List;
+import android.os.Handler;
+import android.os.Looper;
 
 public class ChatViewModel extends AndroidViewModel {
 
     private ChatRepository repo;
     private MutableLiveData<List<Message>> messages;
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable pollingRunnable;
+    private static final long POLLING_INTERVAL = 2000; // 2 másodpercenként frissít
 
     public ChatViewModel(Application application) {
         super(application);
@@ -22,12 +27,39 @@ public class ChatViewModel extends AndroidViewModel {
     }
 
     public LiveData<List<Message>> getMessages(Long groupId) {
-        // This will load messages for a specific group
         repo.loadMessages(groupId, messages);
+        startPolling(groupId); // Indítja a folyamatos frissítést
         return messages;
     }
 
     public void sendMessage(Message message) {
-        repo.sendMessage(message);
+        repo.sendMessage(message, new ChatRepository.MessageCallback() {
+            @Override
+            public void onSuccess() {
+                repo.loadMessages(message.getGroup().getId(), messages);
+            }
+
+            @Override
+            public void onFailure() {
+                // Hiba kezelése
+            }
+        });
+    }
+
+    private void startPolling(Long groupId) {
+        pollingRunnable = new Runnable() {
+            @Override
+            public void run() {
+                repo.loadMessages(groupId, messages);
+                handler.postDelayed(this, POLLING_INTERVAL);
+            }
+        };
+        handler.postDelayed(pollingRunnable, POLLING_INTERVAL);
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        handler.removeCallbacks(pollingRunnable); // Leállítja a pollingot, ha az Activity/Fragment megszűnik
     }
 }

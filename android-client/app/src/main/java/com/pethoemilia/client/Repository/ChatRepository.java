@@ -69,21 +69,30 @@ public class ChatRepository {
         });
     }
 
-    public void sendMessage(Message message) {
+    public void sendMessage(Message message, MessageCallback callback) {
         String encodedcredentials = sharedPref.getString(MyConst.AUTH, null);
         Call<Message> call = messageClient.save(message, encodedcredentials);
         call.enqueue(new Callback<Message>() {
             @Override
             public void onResponse(Call<Message> call, Response<Message> response) {
-                if (!response.isSuccessful()) {
-                    // Handle failure
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    callback.onFailure();
                 }
             }
 
             @Override
             public void onFailure(Call<Message> call, Throwable t) {
-                // Handle failure
+                callback.onFailure();
             }
         });
     }
+
+
+    public interface MessageCallback {
+        void onSuccess();
+        void onFailure();
+    }
+
 }
