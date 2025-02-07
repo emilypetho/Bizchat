@@ -1,5 +1,8 @@
 package com.pethoemilia.client.adapter;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,8 +11,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.R;
 import com.pethoemilia.client.entity.Group;
+import com.pethoemilia.client.entity.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +25,16 @@ import java.util.List;
 public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHolder> {
 
     private List<Group> groups = new ArrayList<>();
+    private User user = new User();
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     private OnItemClickListener listener;
 
     public GroupAdapter(OnItemClickListener listener) {
@@ -41,7 +57,30 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     public void onBindViewHolder(@NonNull GroupViewHolder holder, int position) {
         Group group = groups.get(position);
 
-        holder.groupName.setText(group.getName());
+        //holder.groupName.setText(group.getName());
+
+//        if (group.getUsers() != null && !group.getUsers().isEmpty()) {
+//            for (User member : group.getUsers()) {
+//                if (!member.getId().equals(user.getId())) {
+//                    holder.groupName.setText(member.getName());
+//                    break;
+//                }
+//            }
+//        }
+
+//        if (group.getUsers().size() == 2) {
+//            holder.groupName.setText(user.getName());
+////            Log.e("ize",user.getName());
+//        }else{holder.groupName.setText(group.getName());}
+
+        if (group.getUsers().size() == 2) {//&& !group.getName().equal("Chat")//TODO
+            for (User member : group.getUsers()) {
+                if (!member.getId().equals(user.getId())) {
+                    holder.groupName.setText(member.getName());
+                    break;
+                }
+            }
+        }else{holder.groupName.setText(group.getName());}
 
         if (group.getMessages() != null && !group.getMessages().isEmpty()) {
             holder.lastmessage.setText(group.lastMessage());

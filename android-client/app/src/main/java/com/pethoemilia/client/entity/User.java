@@ -2,6 +2,11 @@ package com.pethoemilia.client.entity;
 
 import com.pethoemilia.client.R;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class User {
@@ -33,7 +38,7 @@ public class User {
 		GUEST, USER, ADMIN
 	}
 	private Role role;
-	Set<Group> groupk;
+	private List<Group> groupk = new ArrayList<>();
 
 	public Long getId() {
 		return id;
@@ -67,15 +72,6 @@ public class User {
 		this.phone_number = phone_number;
 	}
 
-//	public Company getCompany() {
-//		return company;
-//	}
-//
-//	public void setCompany(Company company) {
-//		this.company = company;
-//	}
-
-
 	public Company getCompany() {
 		return company;
 	}
@@ -106,5 +102,31 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public List<Group> getGroupk() {
+		return groupk;
+	}
+
+	public void setGroupk(List<Group> groupk) {
+		this.groupk = groupk;
+	}
+
+	public void sortGroupsByLastMessage() {
+		if (groupk != null && !groupk.isEmpty()) {
+			Collections.sort(groupk, new Comparator<Group>() {
+				@Override
+				public int compare(Group g1, Group g2) {
+					Long timestamp1 = g1.getLastMessageTimestamp();
+					Long timestamp2 = g2.getLastMessageTimestamp();
+
+					if (timestamp1 == null && timestamp2 == null) return 0;
+					if (timestamp1 == null) return 1;
+					if (timestamp2 == null) return -1;
+
+					return timestamp2.compareTo(timestamp1);
+				}
+			});
+		}
 	}
 }
