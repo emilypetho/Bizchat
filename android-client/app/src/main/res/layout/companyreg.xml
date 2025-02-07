@@ -83,7 +83,7 @@
                 android:layout_height="110dp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/buttonAddNewUser"
+                android:id="@+id/buttonAddNewCompany"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:text="Add new company"
