@@ -14,6 +14,7 @@ import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -80,6 +81,10 @@ public class GroupRepository {
                         handleUnauthorized(context);
                     }
                     callback.onGroupsLoaded(groups);
+
+                    // Notify the app that groups have been updated
+                    Intent intent = new Intent("com.pethoemilia.client.UPDATE_GROUPS");
+                    context.sendBroadcast(intent);
                 }
 
                 @Override
@@ -95,3 +100,4 @@ public class GroupRepository {
         context.startActivity(intent);
     }
 }
+//

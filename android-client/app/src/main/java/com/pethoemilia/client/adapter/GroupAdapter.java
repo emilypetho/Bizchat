@@ -2,13 +2,16 @@ package com.pethoemilia.client.adapter;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.media.Image;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
@@ -26,6 +29,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
 
     private List<Group> groups = new ArrayList<>();
     private User user = new User();
+
 
     public User getUser() {
         return user;
@@ -46,6 +50,14 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         notifyDataSetChanged();
     }
 
+//    public void setGroups(List<Group> newGroups) {
+//        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new GroupDiffCallback(groups, newGroups));
+//
+//        groups.clear();
+//        groups.addAll(newGroups);
+//        diffResult.dispatchUpdatesTo(this);
+//    }
+
     @NonNull
     @Override
     public GroupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -57,34 +69,26 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
     public void onBindViewHolder(@NonNull GroupViewHolder holder, int position) {
         Group group = groups.get(position);
 
-        //holder.groupName.setText(group.getName());
-
-//        if (group.getUsers() != null && !group.getUsers().isEmpty()) {
-//            for (User member : group.getUsers()) {
-//                if (!member.getId().equals(user.getId())) {
-//                    holder.groupName.setText(member.getName());
-//                    break;
-//                }
-//            }
-//        }
-
-//        if (group.getUsers().size() == 2) {
-//            holder.groupName.setText(user.getName());
-////            Log.e("ize",user.getName());
-//        }else{holder.groupName.setText(group.getName());}
-
-        if (group.getUsers().size() == 2) {//&& !group.getName().equal("Chat")//TODO
+        // Ha két tag van a csoportban, a név a másik felhasználóra változik
+        if (group.getUsers().size() == 2) {
             for (User member : group.getUsers()) {
                 if (!member.getId().equals(user.getId())) {
                     holder.groupName.setText(member.getName());
                     break;
                 }
             }
-        }else{holder.groupName.setText(group.getName());}
+        } else {
+            holder.groupName.setText(group.getName());
+            holder.image.setImageResource(R.drawable.group);
+        }
 
+        // Üzenet kezelés
         if (group.getMessages() != null && !group.getMessages().isEmpty()) {
-            holder.lastmessage.setText(group.lastMessage());
-
+            if (group.getUsers().size() == 2) {
+                holder.lastmessage.setText(group.lastMessage().getContent());
+            } else {
+                holder.lastmessage.setText(group.lastMessage().getSender().getName() + ": " + group.lastMessage().getContent());
+            }
             Long timestamp = group.getLastMessageTimestamp();
             if (timestamp != null) {
                 Date messageDate = new Date(timestamp);
@@ -111,6 +115,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         }
     }
 
+
     @Override
     public int getItemCount() {
         return groups.size();
@@ -124,12 +129,14 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         TextView groupName;
         TextView lastmessage;
         TextView msgtime;
+        ImageView image;
 
         public GroupViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             groupName = itemView.findViewById(R.id.groupName);
             lastmessage = itemView.findViewById(R.id.lastmessage);
             msgtime = itemView.findViewById(R.id.msgtime);
+            image = itemView.findViewById(R.id.image);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

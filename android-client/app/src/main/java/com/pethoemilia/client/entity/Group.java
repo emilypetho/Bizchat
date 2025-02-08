@@ -1,8 +1,5 @@
 package com.pethoemilia.client.entity;
 
-import android.widget.Toast;
-
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,16 +16,15 @@ public class Group {
 //    private Boolean isGroup;
 
     // Constructor, getters, and setters omitted for brevity
-
-    public String lastMessage() {
+    public Message lastMessage() {
         if (messages == null || messages.isEmpty()) {
-            return "Még nincs üzenet.";
+            return null;
         }
 
         sortMessagesByTimestamp();
 
         Message lastMessage = messages.get(messages.size() - 1);
-        return lastMessage.getContent();
+        return lastMessage;
     }
 
     public Long getLastMessageTimestamp() {

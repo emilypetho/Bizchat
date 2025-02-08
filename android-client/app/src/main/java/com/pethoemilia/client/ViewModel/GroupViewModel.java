@@ -3,6 +3,8 @@ package com.pethoemilia.client.ViewModel;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -20,7 +22,9 @@ import java.util.List;
 public class GroupViewModel extends ViewModel {
     private final GroupRepository repository;
     private final MutableLiveData<List<Group>> groupsLiveData = new MutableLiveData<>();
-
+    private Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable pollingRunnable;
+    private static final long POLLING_INTERVAL = 2000;
     public GroupViewModel() {
         repository = new GroupRepository();
     }
@@ -33,6 +37,7 @@ public class GroupViewModel extends ViewModel {
         repository.loadGroups(userId, context, groups -> {
             groupsLiveData.postValue(groups);
         });
+//        startPolling(userId, context);
     }
 
     public User getUserFromSharedPreferences(Context context) {
@@ -50,4 +55,23 @@ public class GroupViewModel extends ViewModel {
         editor.putString(MyConst.GROUP, new Gson().toJson(group));
         editor.apply();
     }
+//    private void startPolling(long userId, Context context) {
+//        pollingRunnable = new Runnable() {
+//            @Override
+//            public void run() {
+//                repository.loadGroups(userId, context, groups -> {
+//                    groupsLiveData.postValue(groups);
+//                });
+//                handler.postDelayed(this, POLLING_INTERVAL);
+//            }
+//        };
+//        handler.postDelayed(pollingRunnable, POLLING_INTERVAL);
+//    }
+//
+//    @Override
+//    protected void onCleared() {
+//        super.onCleared();
+//        handler.removeCallbacks(pollingRunnable); // Leállítja a pollingot, ha az Activity/Fragment megszűnik
+//    }
 }
+//
