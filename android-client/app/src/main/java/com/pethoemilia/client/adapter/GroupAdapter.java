@@ -66,6 +66,7 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
             for (User member : group.getUsers()) {
                 if (!member.getId().equals(user.getId())) {
                     holder.groupName.setText(member.getName());
+                    holder.image.setImageResource(R.drawable.man);
                     break;
                 }
             }

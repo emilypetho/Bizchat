@@ -44,7 +44,7 @@ public class GroupRepository {
         messageClient = retrofit.create(MessageClient.class);
     }
 
-    public void createGroupWithUsers(String groupName, User currentUser, User user1, String authHeader, GroupCreationCallback callback) {
+    public void createChatWithUser(String groupName, User currentUser, User user1, String authHeader, GroupCreationCallback callback) {
         Group newGroup = new Group();
         newGroup.setName(groupName);
 
@@ -68,6 +68,34 @@ public class GroupRepository {
             @Override
             public void onFailure(Call<Group> call, Throwable t) {
                 callback.onFailure("Hálózati hiba: " + t.getMessage());
+            }
+        });
+    }
+    public void createGroupWithUsers(String groupName, User currentUser, List<User> users, String authHeader, GroupCreationCallback callback) {
+        Group newGroup = new Group();
+        newGroup.setName(groupName);
+
+        Set<User> userSet = new HashSet<>();
+        userSet.add(currentUser);  // Add the current user
+        userSet.addAll(users);      // Add the fetched users
+        newGroup.setUsers(userSet);
+
+        Call<Group> call = groupClient.saveGroup(newGroup, authHeader);
+        call.enqueue(new Callback<Group>() {
+            @Override
+            public void onResponse(Call<Group> call, Response<Group> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    callback.onFailure("Hiba történt a csoport létrehozásakor.");
+                    Log.e("GroupRepository", "Error: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Group> call, Throwable t) {
+                callback.onFailure("Hálózati hiba.");
+                Log.e("GroupRepository", "Failure: " + t.getMessage());
             }
         });
     }

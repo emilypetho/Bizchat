@@ -2,7 +2,6 @@ package com.pethoemilia.client.ViewModel;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -13,20 +12,24 @@ import com.pethoemilia.client.Repository.GroupRepository;
 import com.pethoemilia.client.api.UserClient;
 import com.pethoemilia.client.entity.User;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-public class NewChatViewModel extends ViewModel {
+public class NewGroupViewModel extends ViewModel {
 
     private final MutableLiveData<String> toastMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> closeActivity = new MutableLiveData<>();
     private final GroupRepository groupRepository;
     private final UserClient userClient;
 
-    public NewChatViewModel() {
+    public NewGroupViewModel() {
         groupRepository = new GroupRepository();
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -44,30 +47,41 @@ public class NewChatViewModel extends ViewModel {
     public LiveData<Boolean> getCloseActivity() {
         return closeActivity;
     }
+    public void createGroup(User currentUser, String groupName, List<String> userEmails, String authHeader, Context context) {
+        List<User> users = new ArrayList<>();
+        AtomicInteger pendingRequests = new AtomicInteger(userEmails.size()); // Segít nyomon követni, hány lekérés maradt
 
-    public void createGroup(User currentUser, String userEmail, String authHeader, Context context) {
-        getUserByEmail(userEmail, authHeader, user -> {
-            if (user != null) {
-                groupRepository.createChatWithUser("Chat", currentUser, user, authHeader, new GroupRepository.GroupCreationCallback() {
-                    @Override
-                    public void onSuccess() {
-                        toastMessage.postValue("Csoport sikeresen létrehozva!");
-                        closeActivity.postValue(true);
-                    }
+        for (String email : userEmails) {
+            getUserByEmail(email, authHeader, user -> {
+                if (user != null) {
+                    users.add(user);
+                }
 
-                    @Override
-                    public void onFailure(String errorMessage) {
-                        toastMessage.postValue("Hiba történt: " + errorMessage);
-                        Log.e("NewChatViewModel", "Error creating group: " + errorMessage);
+                // Ha minden lekérés megtörtént
+                if (pendingRequests.decrementAndGet() == 0) {
+                    if (users.size() == userEmails.size()) {
+                        groupRepository.createGroupWithUsers(groupName, currentUser, users, authHeader, new GroupRepository.GroupCreationCallback() {
+                            @Override
+                            public void onSuccess() {
+                                toastMessage.postValue("Csoport sikeresen létrehozva!");
+                                closeActivity.postValue(true);
+                            }
+
+                            @Override
+                            public void onFailure(String errorMessage) {
+                                toastMessage.postValue("Hiba történt: " + errorMessage);
+                                Log.e("NewGroupViewModel", "Error creating group: " + errorMessage);
+                            }
+                        });
+                    } else {
+                        toastMessage.postValue("Néhány e-mail cím nem található.");
                     }
-                });
-            } else {
-                toastMessage.postValue("Felhasználó nem található.");
-            }
-        });
+                }
+            });
+        }
     }
 
-    private void getUserByEmail(String email, String authHeader, UserCallback callback) {
+    private void getUserByEmail(String email, String authHeader, NewChatViewModel.UserCallback callback) {
         Call<User> call = userClient.findByEmail(email, authHeader);
         call.enqueue(new Callback<User>() {
             @Override
@@ -88,6 +102,6 @@ public class NewChatViewModel extends ViewModel {
     }
 
     public interface UserCallback {
-        void onResult(User user);
+        void onResult(List<User> users);
     }
 }
