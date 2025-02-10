@@ -13,7 +13,9 @@ import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,7 +30,10 @@ public class GroupRepository {
     public interface GroupCallback {
         void onGroupsLoaded(List<Group> groups);
     }
-
+    public interface GroupCreationCallback {
+        void onSuccess();
+        void onFailure(String errorMessage);
+    }
     public GroupRepository() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(MyConst.URL)
@@ -37,6 +42,34 @@ public class GroupRepository {
 
         groupClient = retrofit.create(GroupClient.class);
         messageClient = retrofit.create(MessageClient.class);
+    }
+
+    public void createGroupWithUsers(String groupName, User currentUser, User user1, String authHeader, GroupCreationCallback callback) {
+        Group newGroup = new Group();
+        newGroup.setName(groupName);
+
+        Set<User> users = new HashSet<>();
+        users.add(currentUser);
+        users.add(user1);
+
+        newGroup.setUsers(users);
+
+        Call<Group> call = groupClient.saveGroup(newGroup, authHeader);
+        call.enqueue(new Callback<Group>() {
+            @Override
+            public void onResponse(Call<Group> call, Response<Group> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    callback.onFailure("Csoport létrehozása sikertelen, kód: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Group> call, Throwable t) {
+                callback.onFailure("Hálózati hiba: " + t.getMessage());
+            }
+        });
     }
 
     public void loadGroups(long userId, Context context, GroupCallback callback) {

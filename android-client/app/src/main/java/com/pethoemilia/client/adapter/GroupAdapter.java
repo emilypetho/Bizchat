@@ -50,14 +50,6 @@ public class GroupAdapter extends RecyclerView.Adapter<GroupAdapter.GroupViewHol
         notifyDataSetChanged();
     }
 
-//    public void setGroups(List<Group> newGroups) {
-//        DiffUtil.DiffResult diffResult = DiffUtil.calculateDiff(new GroupDiffCallback(groups, newGroups));
-//
-//        groups.clear();
-//        groups.addAll(newGroups);
-//        diffResult.dispatchUpdatesTo(this);
-//    }
-
     @NonNull
     @Override
     public GroupViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
