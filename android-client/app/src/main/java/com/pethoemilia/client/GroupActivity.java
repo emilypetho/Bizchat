@@ -21,6 +21,8 @@ import com.pethoemilia.client.entity.User;
 import com.pethoemilia.client.ViewModel.GroupViewModel;
 import com.pethoemilia.client.service.RefreshService;
 
+import java.util.Collections;
+
 
 public class GroupActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
@@ -60,9 +62,45 @@ public class GroupActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+//        viewModel.getGroups().observe(this, groups -> {
+//            adapter.setGroups(groups);
+//            adapter.notifyDataSetChanged();
+//        });
+
         viewModel.getGroups().observe(this, groups -> {
-            adapter.setGroups(groups);
-            adapter.notifyDataSetChanged();
+            if (groups != null && !groups.isEmpty()) {
+                Log.d("GroupActivity", "Kapott csoportok száma: " + groups.size());
+
+                for (Group group : groups) {
+                    Log.d("GroupActivity", "Csoport: " + group.getName() + ", Timestamp: " + group.getLastMessageTimestamp());
+                }
+
+                try {
+                    // Null értékek kezelése a rendezésnél
+                    Collections.sort(groups, (g1, g2) -> {
+                        Long t1 = g1.getLastMessageTimestamp();
+                        Long t2 = g2.getLastMessageTimestamp();
+
+                        if (t1 == null && t2 == null) return 0;  // Ha mindkettő null, maradjon az eredeti sorrend
+                        if (t1 == null) return 1;  // Ha az első null, a második elé kerül
+                        if (t2 == null) return -1; // Ha a második null, az első elé kerül
+
+                        return Long.compare(t2, t1); // Csökkenő sorrend
+                    });
+
+                    Log.d("GroupActivity", "Csoportok rendezés után:");
+                    for (Group group : groups) {
+                        Log.d("GroupActivity", "Csoport: " + group.getName() + ", Timestamp: " + group.getLastMessageTimestamp());
+                    }
+
+                    adapter.setGroups(groups);
+                    adapter.notifyDataSetChanged();
+                } catch (Exception e) {
+                    Log.e("GroupActivity", "Hiba a csoportok rendezésekor: " + e.getMessage());
+                }
+            } else {
+                Log.e("GroupActivity", "Nem érkezett csoportlista vagy üres.");
+            }
         });
 
         if (user != null) {
