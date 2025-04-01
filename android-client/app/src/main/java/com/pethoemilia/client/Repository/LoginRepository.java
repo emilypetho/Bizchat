@@ -2,11 +2,14 @@ package com.pethoemilia.client.Repository;
 import android.util.Base64;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.api.UserClient;
 import com.pethoemilia.client.entity.User;
+
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,6 +52,12 @@ public class LoginRepository {
         editor.putString(MyConst.AUTH, encodedcredentials);
         editor.putBoolean(MyConst.REMEMBER_ME, rememberMe);
         editor.putString(MyConst.USER, userString);
+        String userId = sharedPref.getString(MyConst.CHANNEL_ID, null);
+        if (userId == null) {
+            userId = UUID.randomUUID().toString();
+            sharedPref.edit().putString(MyConst.CHANNEL_ID, userId).apply();
+        }
+//        Log.d("chabbelid", userId);
         editor.apply();
     }
 

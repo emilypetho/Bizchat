@@ -3,7 +3,7 @@ server:
 
 spring:  
   rabbitmq:
-    host: 192.168.178.1
+    host: 172.20.10.3
     port: 5672
     username: guest
     password: guest
@@ -18,7 +18,7 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver # A MySQL driver osztálya
-    url: jdbc:mysql://localhost:3306/tabla2?useSSL=false&allowPublicKeyRetrieval=true # A MySQL URL-je
+    url: jdbc:mysql://localhost:3306/tabla?useSSL=false&allowPublicKeyRetrieval=true # A MySQL URL-je
     username: root # A MySQL felhasználóneve
     password: 50ReszeltAlma # A MySQL jelszava
     #password: qwertyui

@@ -44,7 +44,7 @@ public class LoginViewModel extends ViewModel {
             public void onResponse(Call<User> call, Response<User> response) {
                 if (response.isSuccessful()) {
                     User user = response.body();
-                    boolean rememberMe = true;  // Ezt a checkbox értéke alapján állíthatod
+                    boolean rememberMe = true;
 //                    String encodedCredentials = "Basic " + password;
                     String encoded = Base64.encodeToString((email + ":" + password).getBytes(), Base64.NO_WRAP);
                     String encodedCredentials = "Basic " + encoded;

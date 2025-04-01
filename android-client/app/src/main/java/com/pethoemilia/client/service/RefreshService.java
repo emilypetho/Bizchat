@@ -90,7 +90,10 @@ public class RefreshService extends Service {
                                 new Thread(() -> {
                                     try {
                                         for (Group group : groupk) {
+                                            channel.queueDeclare("chatQueue", true, false, false, null);
                                             channel.queueBind("chatQueue", "newMessageExchange", group.getName());
+//                                            String queueName = channel.queueDeclare().getQueue();
+//                                            channel.queueBind(queueName, "newMessageExchange", group.getName());
                                         }
                                     } catch (Exception e) {
                                         Log.e("RabbitMQ", "Queue binding error", e);
@@ -130,86 +133,6 @@ public class RefreshService extends Service {
         thread.start();
         return super.onStartCommand(intent, flags, startId);
     }
-
-
-//    @Override
-//    public int onStartCommand(Intent intent, int flags, int startId) {
-//        thread = new Thread(() -> {
-//            try {
-//                ConnectionFactory factory = new ConnectionFactory();
-//                factory.setUsername("guest");
-//                factory.setPassword("guest");
-//                factory.setHost(MyConst.RABBIT_PORT);
-//                factory.setPort(5672);
-//                Connection conn = factory.newConnection();
-//                boolean autoAck = false;
-//                Channel channel = conn.createChannel();
-//                Retrofit retrofit = new Retrofit.Builder()
-//                        .baseUrl(MyConst.URL)
-//                        .addConverterFactory(GsonConverterFactory.create())
-//                        .build();
-//
-//                groupClient = retrofit.create(GroupClient.class);
-//                SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
-//                String userJson = sharedPreferences.getString(MyConst.USER, null);
-//
-//                if (userJson != null) {
-//                    Gson gson = new Gson();
-//                    User user = gson.fromJson(userJson, User.class);
-//
-//                    if (user != null) {
-//                        loadGroups(user.getId(), groups -> {
-//                            if (groups != null) {
-//                                groupk = groups;
-//                                for (Group g : groupk) {
-//                                    Log.d("RabbitMQ", "sima for: " + g.getName());
-//                                }
-//
-//                                new Thread(() -> {
-//                                    try {
-//                                        for (Group group : groupk) {
-//                                            Log.d("RabbitMQ", "kkkkkkkkkkkkkkk: " + group.getName());
-//                                            channel.queueBind("chatQueue", "newMessageExchange",group.getName() );
-//                                        }
-//                                    } catch (Exception e) {
-//                                        Log.e("RabbitMQ", "itt volt baj", e);
-//                                    }
-//
-//                                    try {
-//                                        channel.basicConsume("chatQueue", autoAck, "chatQueue",
-//                                                new DefaultConsumer(channel) {
-//                                                    @Override
-//                                                    public void handleDelivery(String consumerTag, Envelope envelope,
-//                                                                               AMQP.BasicProperties properties, byte[] body)
-//                                                            throws IOException {
-//                                                        long deliveryTag = envelope.getDeliveryTag();
-//                                                        sendNotificationre(new String(body, StandardCharsets.UTF_8));
-//                                                        Log.d("uzenet", new String(body, StandardCharsets.UTF_8));
-//                                                        channel.basicAck(deliveryTag, false);
-//                                                    }
-//                                                });
-//                                    } catch (Exception e) {
-//                                        Log.e("RabbitMQ", "Error in consuming messages", e);
-//                                    }
-//                                }).start();
-//                            } else {
-//                                Log.e("RabbitMQ", "Group list is null");
-//                            }
-//                        });
-//                    } else {
-//                        Log.e("RefreshService", "User is null");
-//                    }
-//                } else {
-//                    Log.e("RefreshService", "User JSON is null");
-//                }
-//            } catch (Exception e) {
-//                Log.e("RabbitMQ", "Error in queue setup", e);
-//            }
-//        });
-//        thread.start();
-//        return super.onStartCommand(intent, flags, startId);
-//
-//    }
 
     @Override
     public void onDestroy() {
