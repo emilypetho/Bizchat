@@ -17,4 +17,7 @@ public interface GroupClient {
 
     @POST("group/save")
     Call<Group> saveGroup(@Body Group group, @Header("Authorization") String authHeader);
+
+    @GET("group/summarize/{id}")
+    Call<String> summarize(@Path("id") long id, @Header("Authorization") String authHeader);
 }

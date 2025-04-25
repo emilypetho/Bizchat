@@ -22,6 +22,7 @@ import com.pethoemilia.client.ViewModel.GroupViewModel;
 import com.pethoemilia.client.service.RefreshService;
 
 import java.util.Collections;
+import java.util.UUID;
 
 
 public class GroupActivity extends AppCompatActivity {
@@ -44,6 +45,8 @@ public class GroupActivity extends AppCompatActivity {
             Intent intent = new Intent(this, LoginActivity.class);
             startActivity(intent);
         }
+
+        manageApplicationKey();
 
         viewModel = new ViewModelProvider(this).get(GroupViewModel.class);
         user = viewModel.getUserFromSharedPreferences(this);
@@ -142,5 +145,17 @@ public class GroupActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    private void manageApplicationKey(){
+        SharedPreferences sharedPref = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        if (!sharedPref.contains(MyConst.APPLICATION_KEY)){
+            String applicationKey = UUID.randomUUID().toString();
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(MyConst.APPLICATION_KEY, applicationKey);
+            editor.apply();
+        }
+
+    }
+
 }
 //

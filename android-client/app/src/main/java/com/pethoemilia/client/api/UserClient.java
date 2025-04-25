@@ -14,19 +14,14 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface UserClient {
-
-    @POST("user/save") // Assuming your endpoint to save a user is "users"
+    @POST("user/save")
     Call<User> save(@Body User user);
-
-    @GET("user/findAll") // Assuming your endpoint to get all users is "users"
+    @GET("user/findAll")
     Call<List<User>> findAll(@Header("Authorization") String authHeader);
-
-    @DELETE("user/delete/{id}") // Assuming your endpoint to delete a user is "users/{id}"
+    @DELETE("user/delete/{id}")
     Call<Void> delete(@Path("id") long id,@Header("Authorization") String authHeader);
-
     @GET("user/findByEmail/{email}")
     Call<User> findByEmail(@Path("email") String email,@Header("Authorization") String authHeader);
-
     @GET("user/checkuser")
     Call<Void> checkUser( @Header("Authorization") String authHeader);
 }

@@ -45,6 +45,7 @@ public class RefreshService extends Service {
     private Thread thread;
     private GroupClient groupClient;
     private List<Group> groupk;
+    private final Gson gson = new Gson();
 
     @Nullable
     @Override
@@ -52,15 +53,6 @@ public class RefreshService extends Service {
         return null;
     }
 
-    private Channel buildRabbitChannel() throws Exception {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setUsername("guest");
-        factory.setPassword("guest");
-        factory.setHost(MyConst.RABBIT_PORT);
-        factory.setPort(5672);
-        Connection conn = factory.newConnection();
-        return conn.createChannel();
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -79,42 +71,59 @@ public class RefreshService extends Service {
                 String userJson = sharedPreferences.getString(MyConst.USER, null);
 
                 if (userJson != null) {
-                    Gson gson = new Gson();
                     User user = gson.fromJson(userJson, User.class);
 
                     if (user != null) {
                         loadGroups(user.getId(), groups -> {
                             if (groups != null) {
                                 groupk = groups;
-
+                                String applicationKey = getApplicationKey();
                                 new Thread(() -> {
                                     try {
+
                                         for (Group group : groupk) {
-                                            channel.queueDeclare("chatQueue", true, false, false, null);
-                                            channel.queueBind("chatQueue", "newMessageExchange", group.getName());
+
+                                            /////////////////////// Ez csak tesztnek van itt, gombra es uj endpointok
+                                            String encodedCredentials = sharedPreferences.getString(MyConst.AUTH, null);
+                                            groupClient.summarize(group.getId(),encodedCredentials).enqueue(new Callback<String>() {
+                                                @Override
+                                                public void onResponse(Call<String> call, Response<String> response) {
+                                                    response.toString();
+                                                }
+
+                                                @Override
+                                                public void onFailure(Call<String> call, Throwable t) {
+                                                    t.toString();
+                                                }
+                                            });
+                                            /////////////////////////// eddig tart a teszt, ez osszefoglalja egy groupban a beszelgetest
+                                            String queueName = "chatQueue" + applicationKey;
+                                            channel.queueDeclare(queueName, true, false, false, null);
+                                            channel.queueBind(queueName, "newMessageExchange", group.getId().toString());
 //                                            String queueName = channel.queueDeclare().getQueue();
 //                                            channel.queueBind(queueName, "newMessageExchange", group.getName());
+                                            try {
+                                                channel.basicConsume(queueName, autoAck, "chatQueue",
+                                                        new DefaultConsumer(channel) {
+                                                            @Override
+                                                            public void handleDelivery(String consumerTag, Envelope envelope,
+                                                                                       AMQP.BasicProperties properties, byte[] body)
+                                                                    throws IOException {
+                                                                long deliveryTag = envelope.getDeliveryTag();
+                                                                sendNotificationre(new String(body, StandardCharsets.UTF_8));
+                                                                Log.d("uzenet", new String(body, StandardCharsets.UTF_8));
+                                                                channel.basicAck(deliveryTag, false);
+                                                            }
+                                                        });
+                                            } catch (Exception e) {
+                                                Log.e("RabbitMQ", "Error in consuming messages", e);
+                                            }
                                         }
                                     } catch (Exception e) {
                                         Log.e("RabbitMQ", "Queue binding error", e);
                                     }
 
-                                    try {
-                                        channel.basicConsume("chatQueue", autoAck, "chatQueue",
-                                                new DefaultConsumer(channel) {
-                                                    @Override
-                                                    public void handleDelivery(String consumerTag, Envelope envelope,
-                                                                               AMQP.BasicProperties properties, byte[] body)
-                                                            throws IOException {
-                                                        long deliveryTag = envelope.getDeliveryTag();
-                                                        sendNotificationre(new String(body, StandardCharsets.UTF_8));
-                                                        Log.d("uzenet", new String(body, StandardCharsets.UTF_8));
-                                                        channel.basicAck(deliveryTag, false);
-                                                    }
-                                                });
-                                    } catch (Exception e) {
-                                        Log.e("RabbitMQ", "Error in consuming messages", e);
-                                    }
+
                                 }).start();
                             } else {
                                 Log.e("RabbitMQ", "Group list is null");
@@ -166,9 +175,10 @@ public class RefreshService extends Service {
     interface GroupCallback {
         void onGroupsLoaded(List<Group> groups);
     }
+
     private void sendNotificationre(String message) {
         try {
-            Gson gson = new Gson();
+
             JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
 
             String senderName = jsonObject.has("sender") && jsonObject.getAsJsonObject("sender").has("name")
@@ -184,13 +194,13 @@ public class RefreshService extends Service {
             // Csoport felhasználóinak ellenőrzése
             JsonObject group = jsonObject.getAsJsonObject("group");
             if (group != null && group.has("users")) {
-                List<User> groupUsers = new Gson().fromJson(group.getAsJsonArray("users"), new TypeToken<List<User>>(){}.getType());
+                List<User> groupUsers = gson.fromJson(group.getAsJsonArray("users"), new TypeToken<List<User>>() {
+                }.getType());
 
                 SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
                 String userJson = sharedPreferences.getString(MyConst.USER, null);
                 if (userJson != null) {
-                    Gson gsonUser = new Gson();
-                    User currentUser = gsonUser.fromJson(userJson, User.class);
+                    User currentUser = gson.fromJson(userJson, User.class);
                     // Ellenőrzés, hogy a felhasználó benne van-e a csoportban, és hogy nem a feladó
                     notification(groupUsers, currentUser, jsonObject, notificationText);
                 }
@@ -225,5 +235,20 @@ public class RefreshService extends Service {
                 }
             }
         }
+    }
+
+    private Channel buildRabbitChannel() throws Exception {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setUsername("guest");
+        factory.setPassword("guest");
+        factory.setHost(MyConst.RABBIT_PORT);
+        factory.setPort(5672);
+        Connection conn = factory.newConnection();
+        return conn.createChannel();
+    }
+
+    private String getApplicationKey() {
+        SharedPreferences sharedPref = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
+        return sharedPref.getString(MyConst.APPLICATION_KEY, "");
     }
 }

@@ -2,6 +2,7 @@ package com.pethoemilia.client.ViewModel;
 
 import android.content.Context;
 import android.util.Base64;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -38,7 +39,7 @@ public class LoginViewModel extends ViewModel {
             loginResult.setValue("Password cannot be empty");
             return;
         }
-
+        Log.d("error",email+"  "+password);
         userRepository.loginUser(email, password, new Callback<User>() {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
@@ -46,6 +47,7 @@ public class LoginViewModel extends ViewModel {
                     User user = response.body();
                     boolean rememberMe = true;
 //                    String encodedCredentials = "Basic " + password;
+
                     String encoded = Base64.encodeToString((email + ":" + password).getBytes(), Base64.NO_WRAP);
                     String encodedCredentials = "Basic " + encoded;
                     userRepository.saveUser(user, encodedCredentials, rememberMe);

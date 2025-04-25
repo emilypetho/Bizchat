@@ -58,4 +58,10 @@ public class GroupController {
 		return new ResponseEntity<>(groupService.findByUserId(id), HttpStatus.OK);
 	}
 
+	@GetMapping(value = "/summarize/{id}", produces = "application/json")
+	@Transactional
+	public ResponseEntity<String> summarize(@PathVariable(name = "id") Long id) {
+		return new ResponseEntity<>(groupService.summarize(id), HttpStatus.OK);
+	}
+
 }

@@ -38,9 +38,9 @@ public class LoginRepository {
     }
 
     public void loginUser(String email, String password, Callback<User> callback) {
+        Log.d("error2",email+"  "+password);
         String encoded = Base64.encodeToString((email + ":" + password).getBytes(), Base64.NO_WRAP);
         String encodedcredentials = "Basic " + encoded;
-
         Call<User> idCall = userClient.findByEmail(email, encodedcredentials);
         idCall.enqueue(callback);
     }

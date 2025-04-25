@@ -28,7 +28,7 @@ public class MessageService {
 	public Message save(Message message) {
 		Message savedMessage = messageRepo.save(message);
 		// Publish the saved message to RabbitMQ
-		rabbitTemplate.convertAndSend(exchange.getName(), savedMessage.getGroup().getName(), savedMessage);
+		rabbitTemplate.convertAndSend(exchange.getName(), savedMessage.getGroup().getId().toString(), savedMessage);
 		return savedMessage;
 	}
 

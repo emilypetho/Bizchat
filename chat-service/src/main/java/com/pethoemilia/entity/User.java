@@ -68,9 +68,16 @@ public class User {
 	@Nonnull
 	@NotEmpty(message = "The password field can't be empty")
 	@Size(min = 8, message = "Password must be at least 8 characters long")
+	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&#+\\-_.])[A-Za-z\\d@$!%*?&#+\\-_.]{8,}$", message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")
 	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
 	private String password;
-	
+
+//	@Nonnull
+//	@NotEmpty(message = "The password field can't be empty")
+//	@Size(min = 8, message = "Password must be at least 8 characters long")
+//	@JsonProperty(access = JsonProperty.Access.READ_WRITE)
+//	private String password;
+
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		return Collections.emptyList();
 	}

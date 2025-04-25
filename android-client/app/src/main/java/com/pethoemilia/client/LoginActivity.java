@@ -2,6 +2,7 @@ package com.pethoemilia.client;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -58,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(view -> {
             String email = emailEditText.getText().toString();
             String password = passwordEditText.getText().toString();
-
+            Log.d("loginerrr",email+"  "+password);
             loginViewModel.loginUser(this, email, password);
         });
     }
