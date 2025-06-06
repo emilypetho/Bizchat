@@ -211,6 +211,13 @@ public class RefreshService extends Service {
     }
 
     private void notification(List<User> groupUsers, User currentUser, JsonObject jsonObject, String notificationText) {
+        SharedPreferences sharedPreferences = getSharedPreferences(MyConst.PREF_NAME, MODE_PRIVATE);
+        boolean notificationsEnabled = sharedPreferences.getBoolean(MyConst.PREF_NOTIFICATIONS_ENABLED, true); // alapból engedélyezett
+
+        if (!notificationsEnabled) {
+            // Ha ki van kapcsolva az értesítés, akkor nem csinálunk semmit
+            return;
+        }
         for (User user : groupUsers) {
             if (currentUser.getId() == user.getId() && currentUser.getId() != jsonObject.getAsJsonObject("sender").get("id").getAsLong()) {
                 // Ha benne van, és nem ő a feladó, akkor küldj értesítést
