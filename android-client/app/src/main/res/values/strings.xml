@@ -7,4 +7,8 @@
     <string name="previous">Previous</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string-array name="theme_options">
+        <item>Világos</item>
+        <item>Sötét</item>
+    </string-array>
 </resources>

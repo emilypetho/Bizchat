@@ -58,7 +58,7 @@
                 android:drawableEnd="@drawable/done_icon"
                 android:hint="Enter your email address"
                 android:minHeight="48dp"
-                android:text="emiliapetho@gmail.com"
+                android:text=""
                 android:id="@+id/editTextEmail"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -78,7 +78,7 @@
                     android:id="@+id/editTextPassword"
                     android:layout_height="match_parent"
                     android:inputType="textPassword"
-                    android:text="password"
+                    android:text=""
                     android:ems="15">
                 </com.google.android.material.textfield.TextInputEditText>
             </com.google.android.material.textfield.TextInputLayout>
