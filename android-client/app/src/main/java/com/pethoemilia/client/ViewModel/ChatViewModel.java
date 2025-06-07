@@ -12,6 +12,10 @@ import java.util.List;
 import android.os.Handler;
 import android.os.Looper;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
 public class ChatViewModel extends AndroidViewModel {
 
     private ChatRepository repo;
@@ -84,6 +88,22 @@ public class ChatViewModel extends AndroidViewModel {
             }
         });
     }
+
+    public void removeUserFromGroupByEmail(long groupId, String email, Runnable onSuccess, Runnable onFailure) {
+        repo.removeUserByEmailFromGroup(email, groupId, new ChatRepository.GroupCallback() {
+            @Override
+            public void onSuccess() {
+                onSuccess.run();
+            }
+
+            @Override
+            public void onFailure() {
+                onFailure.run();
+            }
+        });
+    }
+
+
 
     @Override
     protected void onCleared() {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
@@ -26,5 +27,9 @@ public interface GroupClient {
 
     @GET("groups/{id}")
     Call<Group> findById(@Path("id") long groupId, @Header("Authorization") String authHeader);
+
+    @DELETE("group/removeUser/{groupId}/{userId}")
+    Call<Void> removeUserFromGroup(@Path("groupId") long groupId, @Path("userId") long userId, @Header("Authorization") String authHeader);
+
 
 }

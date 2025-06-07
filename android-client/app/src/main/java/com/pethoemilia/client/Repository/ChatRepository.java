@@ -142,6 +142,104 @@ public class ChatRepository {
     }
 
 
+
+    public void removeUserFromGroup(long groupId, long userId, GroupCallback callback) {
+        String encodedCredentials = sharedPref.getString(MyConst.AUTH, null);
+        Call<Void> call = groupClient.removeUserFromGroup(groupId, userId, encodedCredentials);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.code() == 200 || response.code() == 204) {
+                    callback.onSuccess();
+
+                    // Csoport frissítése
+                    Call<Group> groupCall = groupClient.findById(groupId, encodedCredentials);
+                    groupCall.enqueue(new Callback<Group>() {
+                        @Override
+                        public void onResponse(Call<Group> call, Response<Group> groupResponse) {
+                            if (groupResponse.isSuccessful() && groupResponse.body() != null) {
+                                Group updatedGroup = groupResponse.body();
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putString(MyConst.GROUP, new Gson().toJson(updatedGroup));
+                                editor.apply();
+                                Log.d("RemoveUser", "Csoport frissítve.");
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Group> call, Throwable t) {
+                            Log.e("RemoveUser", "Group lekérés hiba: " + t.getMessage());
+                        }
+                    });
+
+                } else {
+                    Log.e("RemoveUser", "Sikertelen HTTP kód: " + response.code());
+                    callback.onFailure();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("RemoveUser", "Hálózati hiba: " + t.getMessage());
+                callback.onFailure();
+            }
+        });
+    }
+
+    public void removeUserByEmailFromGroup(String email, long groupId, GroupCallback callback) {
+        findUserIdByEmail(email, new UserIdCallback() {
+            @Override
+            public void onSuccess(long userId) {
+                removeUserFromGroup(groupId, userId, new GroupCallback() {
+                    @Override
+                    public void onSuccess() {
+                        // Csoport újratöltése
+                        refreshGroupInSharedPreferences(groupId);
+                        callback.onSuccess();
+                    }
+
+                    @Override
+                    public void onFailure() {
+                        callback.onFailure();
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure() {
+                Log.e("RemoveByEmail", "Nem található a felhasználó e-mail alapján.");
+                callback.onFailure();
+            }
+        });
+    }
+
+
+    public void refreshGroupInSharedPreferences(long groupId) {
+        String authHeader = sharedPref.getString(MyConst.AUTH, null);
+        Call<Group> groupCall = groupClient.findById(groupId, authHeader);
+        groupCall.enqueue(new Callback<Group>() {
+            @Override
+            public void onResponse(Call<Group> call, Response<Group> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    Group updatedGroup = response.body();
+                    SharedPreferences.Editor editor = sharedPref.edit();
+                    editor.putString(MyConst.GROUP, new Gson().toJson(updatedGroup));
+                    editor.apply();
+                    Log.d("RefreshGroup", "Csoport frissítve.");
+                } else {
+                    Log.e("RefreshGroup", "Sikertelen frissítés. HTTP kód: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Group> call, Throwable t) {
+                Log.e("RefreshGroup", "Hiba a csoport frissítésekor: " + t.getMessage());
+            }
+        });
+    }
+
+
+
     public void findUserIdByEmail(String email, UserIdCallback callback) {
         String authHeader = sharedPref.getString(MyConst.AUTH, null);
         Call<User> call = userClient.findByEmail(email, authHeader);

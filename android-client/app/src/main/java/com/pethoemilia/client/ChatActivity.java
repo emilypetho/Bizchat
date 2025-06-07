@@ -1,5 +1,6 @@
 package com.pethoemilia.client;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -34,10 +35,12 @@ public class ChatActivity extends AppCompatActivity {
     private Button buttonSend;
     private EditText editTextEmail;
     private Button buttonAddUser;
+    private Button buttonRemoveUser; // ÚJ
     private LinearLayout addUserLayout;
 
     private Group currentGroup;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,11 +58,11 @@ public class ChatActivity extends AppCompatActivity {
         buttonSend = findViewById(R.id.buttonSend);
         editTextEmail = findViewById(R.id.editTextEmail);
         buttonAddUser = findViewById(R.id.buttonAddUser);
+        buttonRemoveUser = findViewById(R.id.buttonRemoveUser);
         addUserLayout = findViewById(R.id.add_user);
 
-        ImageView buttonToggleAddUser = findViewById(R.id.buttonAdd); // Plusz ikon
-        ImageView buttonDeleteGroup = findViewById(R.id.buttonDeleteGroup); // Kuka ikon
-
+        ImageView buttonToggleAddUser = findViewById(R.id.buttonAdd);
+        ImageView buttonDeleteGroup = findViewById(R.id.buttonDeleteGroup);
         currentGroup = getGroupFromSharedPreferences();
         if (currentGroup != null) {
             User currentUser = getUserFromSharedPreferences();
@@ -80,10 +83,13 @@ public class ChatActivity extends AppCompatActivity {
             });
 
             buttonSend.setOnClickListener(v -> sendMessage());
-            buttonAddUser.setOnClickListener(v -> addUserByEmail());
+
+
             buttonToggleAddUser.setOnClickListener(v -> {
                 if (addUserLayout.getVisibility() == View.GONE) {
                     addUserLayout.setVisibility(View.VISIBLE);
+                    buttonAddUser.setVisibility(View.VISIBLE);
+                    buttonRemoveUser.setVisibility(View.GONE);
                     recyclerView.setVisibility(View.GONE);
                     editTextMessage.setVisibility(View.GONE);
                     buttonSend.setVisibility(View.GONE);
@@ -96,9 +102,29 @@ public class ChatActivity extends AppCompatActivity {
             });
 
             buttonDeleteGroup.setOnClickListener(v -> {
-                Toast.makeText(this, "Csoport törlés funkció még nincs implementálva", Toast.LENGTH_SHORT).show();
-                // Ide jöhet a törlési logika, ha később szükséges
+                if (addUserLayout.getVisibility() == View.GONE) {
+                    addUserLayout.setVisibility(View.VISIBLE);
+                    buttonRemoveUser.setVisibility(View.VISIBLE);
+                    buttonAddUser.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.GONE);
+                    editTextMessage.setVisibility(View.GONE);
+                    buttonSend.setVisibility(View.GONE);
+                } else {
+                    addUserLayout.setVisibility(View.GONE);
+                    buttonRemoveUser.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    editTextMessage.setVisibility(View.VISIBLE);
+                    buttonSend.setVisibility(View.VISIBLE);
+                }
             });
+
+
+            buttonAddUser.setOnClickListener(v -> addUserByEmail());
+            buttonRemoveUser.setOnClickListener(v -> removeUserByEmail());
+
+//            buttonDeleteGroup.setOnClickListener(v ->
+//                    Toast.makeText(this, "Csoport törlés funkció még nincs implementálva", Toast.LENGTH_SHORT).show()
+//            );
         }
     }
 
@@ -129,6 +155,22 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(this, "Írj be egy email címet", Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void removeUserByEmail() {
+        String email = editTextEmail.getText().toString().trim();
+        if (!email.isEmpty()) {
+            chatViewModel.removeUserFromGroupByEmail(currentGroup.getId(), email,
+                    () -> {
+                        currentGroup = getGroupFromSharedPreferences();
+                        Toast.makeText(this, "Sikeresen eltávolítva", Toast.LENGTH_SHORT).show();
+                    },
+                    () -> Toast.makeText(this, "Nem sikerült eltávolítani", Toast.LENGTH_SHORT).show()
+            );
+        } else {
+            Toast.makeText(this, "Írj be egy email címet", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private User getUserFromSharedPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);

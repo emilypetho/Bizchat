@@ -68,6 +68,15 @@
             android:layout_gravity="end"
             android:padding="8dp"
             android:layout_marginTop="4dp" />
+
+        <Button
+            android:id="@+id/buttonRemoveUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Eltávolítás"
+            android:visibility="gone"
+            android:layout_marginStart="8dp" />
+
     </LinearLayout>
 
     <!-- RecyclerView (üzenetek) -->
