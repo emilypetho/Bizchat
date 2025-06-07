@@ -57,6 +57,20 @@ public class ChatViewModel extends AndroidViewModel {
         handler.postDelayed(pollingRunnable, POLLING_INTERVAL);
     }
 
+    public void addUserToGroup(long groupId, long userId, Runnable onSuccess, Runnable onFailure) {
+        repo.addUserToGroup(groupId, userId, new ChatRepository.GroupCallback() {
+            @Override
+            public void onSuccess() {
+                onSuccess.run();
+            }
+
+            @Override
+            public void onFailure() {
+                onFailure.run();
+            }
+        });
+    }
+
     @Override
     protected void onCleared() {
         super.onCleared();

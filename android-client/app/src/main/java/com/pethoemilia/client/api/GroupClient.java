@@ -20,4 +20,7 @@ public interface GroupClient {
 
     @GET("group/summarize/{id}")
     Call<String> summarize(@Path("id") long id, @Header("Authorization") String authHeader);
+
+    @POST("group/addUser/{groupId}/{userId}")
+    Call<Void> addUserToGroup(@Path("groupId") long groupId, @Path("userId") long userId, @Header("Authorization") String authHeader);
 }

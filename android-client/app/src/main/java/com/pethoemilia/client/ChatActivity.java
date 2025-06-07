@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -30,6 +31,10 @@ public class ChatActivity extends AppCompatActivity {
     private TextView chatNameTextView;
     private EditText editTextMessage;
     private Button buttonSend;
+    private EditText editTextEmail;
+    private Button buttonAddUser;
+
+    private Group currentGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,44 +47,61 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         chatViewModel = new ViewModelProvider(this).get(ChatViewModel.class);
+
         chatNameTextView = findViewById(R.id.chat_name);
         editTextMessage = findViewById(R.id.editTextMessage);
         buttonSend = findViewById(R.id.buttonSend);
+        editTextEmail = findViewById(R.id.editTextEmail);
+        buttonAddUser = findViewById(R.id.buttonAddUser);
 
-        Group group = getGroupFromSharedPreferences();
-        if (group != null) {
+        currentGroup = getGroupFromSharedPreferences();
+        if (currentGroup != null) {
             User currentUser = getUserFromSharedPreferences();
-            if (group.getUsers().size() == 2) {
-                for (User member : group.getUsers()) {
+            if (currentGroup.getUsers().size() == 2) {
+                for (User member : currentGroup.getUsers()) {
                     if (!member.getId().equals(currentUser.getId())) {
                         chatNameTextView.setText(member.getName());
                         break;
                     }
                 }
             } else {
-                chatNameTextView.setText(group.getName());
+                chatNameTextView.setText(currentGroup.getName());
             }
 
-            // Observe the messages from ViewModel
-            chatViewModel.getMessages(group.getId()).observe(this, messages -> {
+            chatViewModel.getMessages(currentGroup.getId()).observe(this, messages -> {
                 adapter.setMessages(messages);
                 recyclerView.scrollToPosition(adapter.getItemCount() - 1);
             });
 
-            buttonSend.setOnClickListener(v -> sendMessage(group));
+            buttonSend.setOnClickListener(v -> sendMessage());
+
+            buttonAddUser.setOnClickListener(v -> addUserByEmail());
         }
     }
 
-    private void sendMessage(Group group) {
+    private void sendMessage() {
         String messageContent = editTextMessage.getText().toString().trim();
         if (!messageContent.isEmpty()) {
             User sender = getUserFromSharedPreferences();
-            if (sender != null) {
-                chatViewModel.sendMessage(new Message(messageContent, group, sender));
+            if (sender != null && currentGroup != null) {
+                chatViewModel.sendMessage(new Message(messageContent, currentGroup, sender));
                 editTextMessage.setText("");
             } else {
-                Log.e("ChatActivity", "User not found in SharedPreferences");
+                Log.e("ChatActivity", "Missing user or group");
             }
+        }
+    }
+
+    private void addUserByEmail() {
+        String email = editTextEmail.getText().toString().trim();
+        if (!email.isEmpty()) {
+            long userId = email.hashCode(); // Dummy példa az email -> userId leképezésre
+            chatViewModel.addUserToGroup(currentGroup.getId(), userId,
+                    () -> Toast.makeText(this, "Sikeresen hozzáadva", Toast.LENGTH_SHORT).show(),
+                    () -> Toast.makeText(this, "Nem sikerült hozzáadni", Toast.LENGTH_SHORT).show()
+            );
+        } else {
+            Toast.makeText(this, "Írj be egy email címet", Toast.LENGTH_SHORT).show();
         }
     }
 

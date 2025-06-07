@@ -15,9 +15,7 @@
             android:id="@+id/chat_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-
-            android:textSize="20sp">
-        </TextView>
+            android:textSize="20sp"/>
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -26,25 +24,48 @@
         android:layout_height="0dp"
         android:layout_weight="1" />
 
+    <!-- Új tag hozzáadása email alapján -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:padding="8dp">
+
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Email cím"
+            android:textSize="16sp"/>
+
+        <Button
+            android:id="@+id/buttonAddUser"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hozzáad"/>
+    </LinearLayout>
+
+    <!-- Üzenet küldése -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp">
 
         <EditText
             android:id="@+id/editTextMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textSize="20sp"
-
-            android:hint="Type a message" />
+            android:hint="Írj üzenetet"
+            android:textSize="16sp"/>
 
         <Button
             android:id="@+id/buttonSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Send" />
+            android:text="Küldés"/>
     </LinearLayout>
 
 </LinearLayout>

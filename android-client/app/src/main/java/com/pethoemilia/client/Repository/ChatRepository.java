@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.google.gson.Gson;
 import com.pethoemilia.client.MyConst;
+import com.pethoemilia.client.api.GroupClient;
 import com.pethoemilia.client.api.MessageClient;
 import com.pethoemilia.client.api.UserClient;
 import com.pethoemilia.client.entity.Message;
@@ -25,6 +26,8 @@ public class ChatRepository {
     private static ChatRepository instance;
     private MessageClient messageClient;
     private SharedPreferences sharedPref;
+    private GroupClient groupClient;
+
 
     private ChatRepository(Context context) {
         Retrofit retrofit = new Retrofit.Builder()
@@ -32,6 +35,7 @@ public class ChatRepository {
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         messageClient = retrofit.create(MessageClient.class);
+        groupClient = retrofit.create(GroupClient.class);
         sharedPref = context.getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
     }
 
@@ -87,6 +91,30 @@ public class ChatRepository {
                 callback.onFailure();
             }
         });
+    }
+    public void addUserToGroup(long groupId, long userId, GroupCallback callback) {
+        String encodedCredentials = sharedPref.getString(MyConst.AUTH, null);
+        Call<Void> call = groupClient.addUserToGroup(groupId, userId, encodedCredentials);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    callback.onSuccess();
+                } else {
+                    callback.onFailure();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onFailure();
+            }
+        });
+    }
+
+    public interface GroupCallback {
+        void onSuccess();
+        void onFailure();
     }
 
 
