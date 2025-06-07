@@ -85,7 +85,6 @@ public class ChatViewModel extends AndroidViewModel {
         });
     }
 
-
     @Override
     protected void onCleared() {
         super.onCleared();

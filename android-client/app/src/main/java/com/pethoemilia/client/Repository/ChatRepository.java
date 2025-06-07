@@ -101,42 +101,46 @@ public class ChatRepository {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
-                    // új csoport lekérése friss állapottal
+                Log.d("AddUser", "HTTP code: " + response.code());
+                if (response.code() == 200 || response.code() == 204) {
+                    // itt a felhasználó sikeresen hozzáadva, callback.onSuccess meghívása, függetlenül a csoport frissítésétől
+                    callback.onSuccess();
+
+                    // továbbra is frissítjük a csoportot, de ha nem sikerül, csak logoljuk, nem hívjuk onFailure-t
                     Call<Group> groupCall = groupClient.findById(groupId, encodedCredentials);
                     groupCall.enqueue(new Callback<Group>() {
                         @Override
                         public void onResponse(Call<Group> call, Response<Group> groupResponse) {
                             if (groupResponse.isSuccessful() && groupResponse.body() != null) {
                                 Group updatedGroup = groupResponse.body();
-
-                                // SharedPreferences frissítése
                                 SharedPreferences.Editor editor = sharedPref.edit();
                                 editor.putString(MyConst.GROUP, new Gson().toJson(updatedGroup));
                                 editor.apply();
-
-                                callback.onSuccess();
+                                Log.d("AddUser", "Csoport frissítve.");
                             } else {
-                                callback.onFailure();
+                                Log.e("AddUser", "Group frissítés sikertelen. Kód: " + groupResponse.code());
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Group> call, Throwable t) {
-                            callback.onFailure();
+                            Log.e("AddUser", "Group lekérés hiba: " + t.getMessage());
                         }
                     });
                 } else {
+                    Log.e("AddUser", "AddUserToGroup sikertelen. HTTP kód: " + response.code());
                     callback.onFailure();
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
+                Log.e("AddUser", "Hálózati hiba: " + t.getMessage());
                 callback.onFailure();
             }
         });
     }
+
 
     public void findUserIdByEmail(String email, UserIdCallback callback) {
         String authHeader = sharedPref.getString(MyConst.AUTH, null);
