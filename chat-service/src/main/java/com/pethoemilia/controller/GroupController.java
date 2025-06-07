@@ -63,5 +63,18 @@ public class GroupController {
 	public ResponseEntity<String> summarize(@PathVariable(name = "id") Long id) {
 		return new ResponseEntity<>(groupService.summarize(id), HttpStatus.OK);
 	}
+	@PostMapping(value = "/addUser/{groupId}/{userId}")
+	@Transactional
+	public ResponseEntity<String> addUserToGroup(@PathVariable Long groupId, @PathVariable Long userId) {
+		groupService.addUserToGroup(groupId, userId);
+		return new ResponseEntity<>("Felhasználó hozzáadva a csoporthoz", HttpStatus.OK);
+	}
+
+	@DeleteMapping(value = "/removeUser/{groupId}/{userId}")
+	@Transactional
+	public ResponseEntity<String> removeUserFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
+		groupService.removeUserFromGroup(groupId, userId);
+		return new ResponseEntity<>("Felhasználó eltávolítva a csoportból", HttpStatus.OK);
+	}
 
 }

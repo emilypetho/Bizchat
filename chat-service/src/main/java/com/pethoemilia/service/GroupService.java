@@ -6,10 +6,12 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pethoemilia.entity.Group;
 import com.pethoemilia.entity.Message;
+import com.pethoemilia.entity.User;
 import com.pethoemilia.repository.IGroupRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -58,6 +60,28 @@ public class GroupService {
 			responses.append(result.getOutput().getText());
 		}
 		return responses.toString();
+	}
+	@Autowired
+	private final UserService userService;
+
+	public void addUserToGroup(Long groupId, Long userId) {
+		Group group = findById(groupId);
+		User user = userService.findById(userId);
+
+		if (group != null && user != null && !group.getUsers().contains(user)) {
+			group.getUsers().add(user);
+			groupRepo.save(group);
+		}
+	}
+
+	public void removeUserFromGroup(Long groupId, Long userId) {
+		Group group = findById(groupId);
+		User user = userService.findById(userId);
+
+		if (group != null && user != null && group.getUsers().contains(user)) {
+			group.getUsers().remove(user);
+			groupRepo.save(group);
+		}
 	}
 
 }
