@@ -23,4 +23,8 @@ public interface GroupClient {
 
     @POST("group/addUser/{groupId}/{userId}")
     Call<Void> addUserToGroup(@Path("groupId") long groupId, @Path("userId") long userId, @Header("Authorization") String authHeader);
+
+    @GET("groups/{id}")
+    Call<Group> findById(@Path("id") long groupId, @Header("Authorization") String authHeader);
+
 }

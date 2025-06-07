@@ -11,6 +11,7 @@ import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.api.GroupClient;
 import com.pethoemilia.client.api.MessageClient;
 import com.pethoemilia.client.api.UserClient;
+import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
@@ -27,6 +28,7 @@ public class ChatRepository {
     private MessageClient messageClient;
     private SharedPreferences sharedPref;
     private GroupClient groupClient;
+    private UserClient userClient;
 
 
     private ChatRepository(Context context) {
@@ -36,6 +38,7 @@ public class ChatRepository {
                 .build();
         messageClient = retrofit.create(MessageClient.class);
         groupClient = retrofit.create(GroupClient.class);
+        userClient = retrofit.create(UserClient.class);
         sharedPref = context.getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
     }
 
@@ -99,7 +102,30 @@ public class ChatRepository {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    callback.onSuccess();
+                    // új csoport lekérése friss állapottal
+                    Call<Group> groupCall = groupClient.findById(groupId, encodedCredentials);
+                    groupCall.enqueue(new Callback<Group>() {
+                        @Override
+                        public void onResponse(Call<Group> call, Response<Group> groupResponse) {
+                            if (groupResponse.isSuccessful() && groupResponse.body() != null) {
+                                Group updatedGroup = groupResponse.body();
+
+                                // SharedPreferences frissítése
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putString(MyConst.GROUP, new Gson().toJson(updatedGroup));
+                                editor.apply();
+
+                                callback.onSuccess();
+                            } else {
+                                callback.onFailure();
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Group> call, Throwable t) {
+                            callback.onFailure();
+                        }
+                    });
                 } else {
                     callback.onFailure();
                 }
@@ -111,6 +137,32 @@ public class ChatRepository {
             }
         });
     }
+
+    public void findUserIdByEmail(String email, UserIdCallback callback) {
+        String authHeader = sharedPref.getString(MyConst.AUTH, null);
+        Call<User> call = userClient.findByEmail(email, authHeader);
+        call.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    callback.onSuccess(response.body().getId());
+                } else {
+                    callback.onFailure();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                callback.onFailure();
+            }
+        });
+    }
+
+    public interface UserIdCallback {
+        void onSuccess(long userId);
+        void onFailure();
+    }
+
 
     public interface GroupCallback {
         void onSuccess();

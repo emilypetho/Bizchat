@@ -71,6 +71,21 @@ public class ChatViewModel extends AndroidViewModel {
         });
     }
 
+    public void addUserToGroupByEmail(long groupId, String email, Runnable onSuccess, Runnable onFailure) {
+        repo.findUserIdByEmail(email, new ChatRepository.UserIdCallback() {
+            @Override
+            public void onSuccess(long userId) {
+                addUserToGroup(groupId, userId, onSuccess, onFailure);
+            }
+
+            @Override
+            public void onFailure() {
+                onFailure.run();
+            }
+        });
+    }
+
+
     @Override
     protected void onCleared() {
         super.onCleared();

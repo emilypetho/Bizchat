@@ -95,15 +95,18 @@ public class ChatActivity extends AppCompatActivity {
     private void addUserByEmail() {
         String email = editTextEmail.getText().toString().trim();
         if (!email.isEmpty()) {
-            long userId = email.hashCode(); // Dummy példa az email -> userId leképezésre
-            chatViewModel.addUserToGroup(currentGroup.getId(), userId,
-                    () -> Toast.makeText(this, "Sikeresen hozzáadva", Toast.LENGTH_SHORT).show(),
+            chatViewModel.addUserToGroupByEmail(currentGroup.getId(), email,
+                    () -> {
+                        currentGroup = getGroupFromSharedPreferences(); // újratöltés
+                        Toast.makeText(this, "Sikeresen hozzáadva", Toast.LENGTH_SHORT).show();
+                    },
                     () -> Toast.makeText(this, "Nem sikerült hozzáadni", Toast.LENGTH_SHORT).show()
             );
         } else {
             Toast.makeText(this, "Írj be egy email címet", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     private User getUserFromSharedPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
