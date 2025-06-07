@@ -4,8 +4,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,8 +24,6 @@ import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
-import java.util.List;
-
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -33,6 +34,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button buttonSend;
     private EditText editTextEmail;
     private Button buttonAddUser;
+    private LinearLayout addUserLayout;
 
     private Group currentGroup;
 
@@ -53,6 +55,10 @@ public class ChatActivity extends AppCompatActivity {
         buttonSend = findViewById(R.id.buttonSend);
         editTextEmail = findViewById(R.id.editTextEmail);
         buttonAddUser = findViewById(R.id.buttonAddUser);
+        addUserLayout = findViewById(R.id.add_user);
+
+        ImageView buttonToggleAddUser = findViewById(R.id.buttonAdd); // Plusz ikon
+        ImageView buttonDeleteGroup = findViewById(R.id.buttonDeleteGroup); // Kuka ikon
 
         currentGroup = getGroupFromSharedPreferences();
         if (currentGroup != null) {
@@ -74,8 +80,25 @@ public class ChatActivity extends AppCompatActivity {
             });
 
             buttonSend.setOnClickListener(v -> sendMessage());
-
             buttonAddUser.setOnClickListener(v -> addUserByEmail());
+            buttonToggleAddUser.setOnClickListener(v -> {
+                if (addUserLayout.getVisibility() == View.GONE) {
+                    addUserLayout.setVisibility(View.VISIBLE);
+                    recyclerView.setVisibility(View.GONE);
+                    editTextMessage.setVisibility(View.GONE);
+                    buttonSend.setVisibility(View.GONE);
+                } else {
+                    addUserLayout.setVisibility(View.GONE);
+                    recyclerView.setVisibility(View.VISIBLE);
+                    editTextMessage.setVisibility(View.VISIBLE);
+                    buttonSend.setVisibility(View.VISIBLE);
+                }
+            });
+
+            buttonDeleteGroup.setOnClickListener(v -> {
+                Toast.makeText(this, "Csoport törlés funkció még nincs implementálva", Toast.LENGTH_SHORT).show();
+                // Ide jöhet a törlési logika, ha később szükséges
+            });
         }
     }
 

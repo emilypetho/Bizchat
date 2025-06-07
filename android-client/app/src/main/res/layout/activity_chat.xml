@@ -1,57 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/add_user_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="8dp">
 
+    <!-- Csoport neve + plusz + kuka ikon -->
     <LinearLayout
         android:id="@+id/chat_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/edit_text_rounded_corner"
         android:backgroundTint="@color/chat_color_receiver"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- Csoportnév -->
         <TextView
             android:id="@+id/chat_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20sp"/>
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- Új tag hozzáadása email alapján -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="8dp">
-
-        <EditText
-            android:id="@+id/editTextEmail"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:textSize="20sp"
+            android:text="Csoport neve" />
+
+        <!-- Plusz ikon -->
+        <ImageView
+            android:id="@+id/buttonAdd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_add"
+            android:contentDescription="Felhasználó hozzáadása"
+            android:padding="8dp" />
+
+        <!-- Kuka ikon -->
+        <ImageView
+            android:id="@+id/buttonDeleteGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_delete"
+            android:contentDescription="Csoport törlése"
+            android:padding="8dp" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:visibility="gone"
+        android:id="@+id/add_user">
+
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:hint="Email cím"
-            android:textSize="16sp"/>
+            android:inputType="textEmailAddress"
+            android:padding="8dp" />
 
         <Button
             android:id="@+id/buttonAddUser"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hozzáad"/>
+            android:text="Hozzáadás"
+            android:layout_gravity="end"
+            android:padding="8dp"
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
-    <!-- Üzenet küldése -->
+    <!-- RecyclerView (üzenetek) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="4dp" />
+
+    <!-- Üzenet írás + küldés -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:gravity="center_vertical">
 
         <EditText
             android:id="@+id/editTextMessage"
@@ -59,13 +92,12 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:hint="Írj üzenetet"
-            android:textSize="16sp"/>
+            android:textSize="16sp" />
 
         <Button
             android:id="@+id/buttonSend"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Küldés"/>
+            android:text="Küldés" />
     </LinearLayout>
-
 </LinearLayout>
