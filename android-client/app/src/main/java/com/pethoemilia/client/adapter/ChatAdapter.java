@@ -1,6 +1,7 @@
 package com.pethoemilia.client.adapter;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,11 +11,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.pethoemilia.client.MyConst;
 import com.pethoemilia.client.R;
+import com.pethoemilia.client.Repository.ChatRepository;
 import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
@@ -28,12 +31,38 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
     private List<Message> messages = new ArrayList<>();
     private Context context; // Context változó hozzáadása
-
+    private ChatRepository repo;
     // Konstruktor a Context paraméterrel
     public ChatAdapter(Context context) {
         this.context = context;
+        repo = ChatRepository.getInstance(context);
     }
 
+    public void translate(String message) {
+        repo.translate(message, new ChatRepository.StringCallback() {
+            @Override
+            public void onSuccess(String res) {
+                showMessageDialog(context,res);
+            }
+            @Override
+            public void onFailure() {
+                Log.e("ChatViewModel", "Összegzés sikertelen");
+            }
+        });
+    }
+    public static void showMessageDialog(Context context, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message)
+                .setCancelable(true)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
     @NonNull
     @Override
     public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -94,6 +123,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
                         holder.receiverChatTime.setVisibility(View.VISIBLE);
                     } else {
                         holder.receiverChatTime.setVisibility(View.GONE);
+                    }
+                });
+                holder.receiverChat.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        translate(holder.receiverChat.getText().toString());
+                        return false;
                     }
                 });
             }

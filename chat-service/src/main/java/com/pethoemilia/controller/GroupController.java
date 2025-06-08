@@ -63,6 +63,12 @@ public class GroupController {
 	public ResponseEntity<String> summarize(@PathVariable(name = "id") Long id) {
 		return new ResponseEntity<>(groupService.summarize(id), HttpStatus.OK);
 	}
+	
+	@PostMapping(value = "/translate", produces = "application/json")
+	@Transactional
+	public ResponseEntity<String> translate(@RequestBody String message) {
+		return new ResponseEntity<>(groupService.translate(message), HttpStatus.OK);
+	}
 	@PostMapping(value = "/addUser/{groupId}/{userId}")
 	@Transactional
 	public ResponseEntity<String> addUserToGroup(@PathVariable Long groupId, @PathVariable Long userId) {

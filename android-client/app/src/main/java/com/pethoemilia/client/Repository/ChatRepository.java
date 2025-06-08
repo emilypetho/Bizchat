@@ -144,8 +144,6 @@ public class ChatRepository {
         });
     }
 
-
-
     public void removeUserFromGroup(long groupId, long userId, GroupCallback callback) {
         String encodedCredentials = sharedPref.getString(MyConst.AUTH, null);
         Call<Void> call = groupClient.removeUserFromGroup(groupId, userId, encodedCredentials);
@@ -260,6 +258,32 @@ public class ChatRepository {
     public void summarizeGroup(long id, StringCallback callback) {
         String authHeader = sharedPref.getString(MyConst.AUTH, null);
         Call<ResponseBody> call = groupClient.summarize(id, authHeader);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> callResult, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String res = null;
+                    try {
+                        res = response.body().string();
+                        callback.onSuccess(res);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                } else {
+                    //Toast.makeText(this, "Nem siker", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onFailure();
+            }
+        });
+    }
+
+    public void translate(String message, StringCallback callback) {
+        String authHeader = sharedPref.getString(MyConst.AUTH, null);
+        Call<ResponseBody> call = groupClient.trsanslate(message, authHeader);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> callResult, Response<ResponseBody> response) {

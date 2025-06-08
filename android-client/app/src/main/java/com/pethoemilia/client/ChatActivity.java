@@ -238,6 +238,21 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+    public void translate(String message) {
+        Context context = this;
+        repo = ChatRepository.getInstance(getApplicationContext().getApplicationContext());
+        repo.translate(message, new ChatRepository.StringCallback() {
+            @Override
+            public void onSuccess(String res) {
+                //textView.setText(res);
+                showMessageDialog(context,res);
+            }
+            @Override
+            public void onFailure() {
+                Log.e("ChatViewModel", "Összegzés sikertelen");
+            }
+        });
+    }
     public static void showMessageDialog(Context context, String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(message)

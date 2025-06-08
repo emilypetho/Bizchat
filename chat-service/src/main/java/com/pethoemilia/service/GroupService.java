@@ -51,7 +51,18 @@ public class GroupService {
 			sb.append(message.getSender().getName() + ":");
 			sb.append(message.getContent() + "\n");
 		}
-		ChatResponse response = chatModel.call(new Prompt("Foglald ossze es forditsd le magyarra: \"" + sb.toString() + "\"",
+		ChatResponse response = chatModel.call(new Prompt("Foglald ossze: \"" + sb.toString() + "\"",
+				OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.4).build()));
+		response.toString();
+		var resultList = response.getResults();
+		StringBuilder responses = new StringBuilder();
+		for (var result : resultList) {
+			responses.append(result.getOutput().getText());
+		}
+		return responses.toString();
+	}
+	public String translate(String message) {
+		ChatResponse response = chatModel.call(new Prompt("Please translate to english: \"" + message.toString() + "\"",
 				OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.4).build()));
 		response.toString();
 		var resultList = response.getResults();
