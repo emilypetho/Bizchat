@@ -1,6 +1,8 @@
 package com.pethoemilia.client.ViewModel;
 
 import android.app.Application;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -83,4 +85,5 @@ public class ChatViewModel extends AndroidViewModel {
             }
         });
     }
+
 }

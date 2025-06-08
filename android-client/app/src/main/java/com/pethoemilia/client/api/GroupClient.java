@@ -4,6 +4,7 @@ import com.pethoemilia.client.entity.Group;
 
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -20,7 +21,7 @@ public interface GroupClient {
     Call<Group> saveGroup(@Body Group group, @Header("Authorization") String authHeader);
 
     @GET("group/summarize/{id}")
-    Call<String> summarize(@Path("id") long id, @Header("Authorization") String authHeader);
+    Call<ResponseBody> summarize(@Path("id") long id, @Header("Authorization") String authHeader);
 
     @POST("group/addUser/{groupId}/{userId}")
     Call<Void> addUserToGroup(@Path("groupId") long groupId, @Path("userId") long userId, @Header("Authorization") String authHeader);

@@ -3,6 +3,7 @@ import android.util.Base64;
 import android.util.Log;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -15,8 +16,10 @@ import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
+import java.io.IOException;
 import java.util.List;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -193,7 +196,6 @@ public class ChatRepository {
                 removeUserFromGroup(groupId, userId, new GroupCallback() {
                     @Override
                     public void onSuccess() {
-                        // Csoport újratöltése
                         refreshGroupInSharedPreferences(groupId);
                         callback.onSuccess();
                     }
@@ -212,8 +214,6 @@ public class ChatRepository {
             }
         });
     }
-
-
     public void refreshGroupInSharedPreferences(long groupId) {
         String authHeader = sharedPref.getString(MyConst.AUTH, null);
         Call<Group> groupCall = groupClient.findById(groupId, authHeader);
@@ -238,8 +238,6 @@ public class ChatRepository {
         });
     }
 
-
-
     public void findUserIdByEmail(String email, UserIdCallback callback) {
         String authHeader = sharedPref.getString(MyConst.AUTH, null);
         Call<User> call = userClient.findByEmail(email, authHeader);
@@ -259,22 +257,46 @@ public class ChatRepository {
             }
         });
     }
+    public void summarizeGroup(long id, StringCallback callback) {
+        String authHeader = sharedPref.getString(MyConst.AUTH, null);
+        Call<ResponseBody> call = groupClient.summarize(id, authHeader);
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> callResult, Response<ResponseBody> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    String res = null;
+                    try {
+                        res = response.body().string();
+                        callback.onSuccess(res);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
 
+                } else {
+                    //Toast.makeText(this, "Nem siker", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                callback.onFailure();
+            }
+        });
+    }
     public interface UserIdCallback {
         void onSuccess(long userId);
         void onFailure();
     }
 
-
     public interface GroupCallback {
         void onSuccess();
         void onFailure();
     }
-
-
     public interface MessageCallback {
         void onSuccess();
         void onFailure();
     }
-
+    public interface StringCallback {
+        void onSuccess(String res);
+        void onFailure();
+    }
 }

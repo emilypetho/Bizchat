@@ -84,18 +84,18 @@ public class RefreshService extends Service {
                                         for (Group group : groupk) {
 
                                             /////////////////////// Ez csak tesztnek van itt, gombra es uj endpointok
-                                            String encodedCredentials = sharedPreferences.getString(MyConst.AUTH, null);
-                                            groupClient.summarize(group.getId(),encodedCredentials).enqueue(new Callback<String>() {
-                                                @Override
-                                                public void onResponse(Call<String> call, Response<String> response) {
-                                                    response.toString();
-                                                }
-
-                                                @Override
-                                                public void onFailure(Call<String> call, Throwable t) {
-                                                    t.toString();
-                                                }
-                                            });
+//                                            String encodedCredentials = sharedPreferences.getString(MyConst.AUTH, null);
+//                                            groupClient.summarize(group.getId(),encodedCredentials).enqueue(new Callback<String>() {
+//                                                @Override
+//                                                public void onResponse(Call<String> call, Response<String> response) {
+//                                                    response.toString();
+//                                                }
+//
+//                                                @Override
+//                                                public void onFailure(Call<String> call, Throwable t) {
+//                                                    t.toString();
+//                                                }
+//                                            });
                                             /////////////////////////// eddig tart a teszt, ez osszefoglalja egy groupban a beszelgetest
                                             String queueName = "chatQueue" + applicationKey;
                                             channel.queueDeclare(queueName, true, false, false, null);

@@ -26,6 +26,14 @@
             android:textSize="20sp"
             android:text="Csoport neve" />
 
+        <ImageView
+            android:id="@+id/buttonAi"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_info_details"
+            android:contentDescription="Felhasználó hozzáadása"
+            android:padding="8dp" />
+
         <!-- Plusz ikon -->
         <ImageView
             android:id="@+id/buttonAdd"
@@ -76,6 +84,13 @@
             android:text="Eltávolítás"
             android:visibility="gone"
             android:layout_marginStart="8dp" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:textColor="@color/white"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

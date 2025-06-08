@@ -42,7 +42,7 @@ public class AIController {
 
         Prompt prompt = new Prompt("Válaszolj erre a kérdésre magyarul: " + input);
         ChatResponse response = chatModel.call(prompt);
-        String content = response.getResult().getOutput().getContent();
+        String content = response.getResult().getOutput().getText();
 
         return ResponseEntity.ok(content);
     }

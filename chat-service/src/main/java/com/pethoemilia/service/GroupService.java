@@ -51,8 +51,8 @@ public class GroupService {
 			sb.append(message.getSender().getName() + ":");
 			sb.append(message.getContent() + "\n");
 		}
-		ChatResponse response = chatModel.call(new Prompt("Foglald ossze: \"" + sb.toString() + "\"",
-				OpenAiChatOptions.builder().model("llama-3.3-70b-versatile").temperature(0.4).build()));
+		ChatResponse response = chatModel.call(new Prompt("Foglald ossze es forditsd le magyarra: \"" + sb.toString() + "\"",
+				OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.4).build()));
 		response.toString();
 		var resultList = response.getResults();
 		StringBuilder responses = new StringBuilder();

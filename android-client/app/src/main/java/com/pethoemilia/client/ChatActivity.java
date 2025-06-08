@@ -3,6 +3,7 @@ package com.pethoemilia.client;
 import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -16,12 +17,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
+import com.pethoemilia.client.Repository.ChatRepository;
 import com.pethoemilia.client.ViewModel.ChatViewModel;
 import com.pethoemilia.client.adapter.ChatAdapter;
 import com.pethoemilia.client.entity.Group;
@@ -41,11 +44,10 @@ public class ChatActivity extends AppCompatActivity {
     private EditText editTextEmail;
     private Button buttonAddUser;
     private Button buttonRemoveUser;
+    private TextView textView;
     private LinearLayout addUserLayout;
-
     private Group currentGroup;
 
-    // ÚJ: BroadcastReceiver a csoportfrissítéshez
     private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -93,9 +95,11 @@ public class ChatActivity extends AppCompatActivity {
         buttonAddUser = findViewById(R.id.buttonAddUser);
         buttonRemoveUser = findViewById(R.id.buttonRemoveUser);
         addUserLayout = findViewById(R.id.add_user);
+        textView = findViewById(R.id.textView);
 
         ImageView buttonToggleAddUser = findViewById(R.id.buttonAdd);
         ImageView buttonDeleteGroup = findViewById(R.id.buttonDeleteGroup);
+        ImageView buttonAi = findViewById(R.id.buttonAi);
 
         currentGroup = getGroupFromSharedPreferences();
         if (currentGroup != null) {
@@ -149,6 +153,11 @@ public class ChatActivity extends AppCompatActivity {
                     editTextMessage.setVisibility(View.VISIBLE);
                     buttonSend.setVisibility(View.VISIBLE);
                 }
+            });
+
+            buttonAi.setOnClickListener(v -> {
+                summarizeGroup(currentGroup.getId());
+                //Toast.makeText(this, "sdrfgth", Toast.LENGTH_SHORT).show();
             });
 
             buttonAddUser.setOnClickListener(v -> addUserByEmail());
@@ -212,5 +221,34 @@ public class ChatActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         String groupJson = sharedPreferences.getString(MyConst.GROUP, null);
         return new Gson().fromJson(groupJson, Group.class);
+    }
+    private ChatRepository repo;
+    public void summarizeGroup(long groupId) {
+        Context context = this;
+        repo = ChatRepository.getInstance(getApplicationContext().getApplicationContext());
+        repo.summarizeGroup(groupId, new ChatRepository.StringCallback() {
+            @Override
+            public void onSuccess(String res) {
+                //textView.setText(res);
+                showMessageDialog(context,res);
+            }
+            @Override
+            public void onFailure() {
+                Log.e("ChatViewModel", "Összegzés sikertelen");
+            }
+        });
+    }
+    public static void showMessageDialog(Context context, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setMessage(message)
+                .setCancelable(true)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 }
