@@ -46,9 +46,10 @@ public class ChatActivity extends AppCompatActivity {
     private Button buttonRemoveUser;
     private TextView textView;
     private LinearLayout addUserLayout;
+//    private BroadcastReceiver messageReceiver;
     private Group currentGroup;
 
-    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver messageReceiver=new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             long receivedGroupId = intent.getLongExtra("groupId", -1);
@@ -60,20 +61,27 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
     };
+    private boolean isReceiverRegistered = false;
 
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter filter = new IntentFilter("com.pethoemilia.NEW_MESSAGE");
-        registerReceiver(messageReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        if (!isReceiverRegistered) {
+            IntentFilter filter = new IntentFilter("com.pethoemilia.NEW_MESSAGE");
+            registerReceiver(messageReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            isReceiverRegistered = true;
+        }
     }
-
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(messageReceiver);
+        if (isReceiverRegistered) {
+            unregisterReceiver(messageReceiver);
+            isReceiverRegistered = false;
+        }
     }
+
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -162,6 +170,23 @@ public class ChatActivity extends AppCompatActivity {
 
             buttonAddUser.setOnClickListener(v -> addUserByEmail());
             buttonRemoveUser.setOnClickListener(v -> removeUserByEmail());
+
+//            buttonDeleteGroup.setOnClickListener(v ->
+//                    Toast.makeText(this, "Csoport törlés funkció még nincs implementálva", Toast.LENGTH_SHORT).show()
+//            );
+//            messageReceiver = new BroadcastReceiver() {
+//                @Override
+//                public void onReceive(Context context, Intent intent) {
+//                    long receivedGroupId = intent.getLongExtra("groupId", -1);
+//                    if (currentGroup != null && receivedGroupId == currentGroup.getId()) {
+//                        chatViewModel.getMessages(currentGroup.getId()).observe(ChatActivity.this, messages -> {
+//                            adapter.setMessages(messages);
+//                            recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+//                        });
+//                    }
+//                }
+//            };
+
         }
     }
 

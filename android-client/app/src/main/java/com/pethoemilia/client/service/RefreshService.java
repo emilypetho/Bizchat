@@ -194,6 +194,7 @@ public class RefreshService extends Service {
             // Csoport felhasználóinak ellenőrzése
             JsonObject group = jsonObject.getAsJsonObject("group");
             if (group != null && group.has("users")) {
+                sendBroadcastToChat(group.get("id").getAsLong());
                 List<User> groupUsers = gson.fromJson(group.getAsJsonArray("users"), new TypeToken<List<User>>() {
                 }.getType());
 
@@ -258,4 +259,11 @@ public class RefreshService extends Service {
         SharedPreferences sharedPref = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
         return sharedPref.getString(MyConst.APPLICATION_KEY, "");
     }
+
+    private void sendBroadcastToChat(long groupId) {
+        Intent intent = new Intent("com.pethoemilia.NEW_MESSAGE");
+        intent.putExtra("groupId", groupId);
+        sendBroadcast(intent);
+    }
+
 }
