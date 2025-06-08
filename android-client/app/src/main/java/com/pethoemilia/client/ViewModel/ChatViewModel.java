@@ -8,21 +8,13 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.pethoemilia.client.Repository.ChatRepository;
 import com.pethoemilia.client.entity.Message;
-import java.util.List;
-import android.os.Handler;
-import android.os.Looper;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.List;
 
 public class ChatViewModel extends AndroidViewModel {
 
     private ChatRepository repo;
     private MutableLiveData<List<Message>> messages;
-    private Handler handler = new Handler(Looper.getMainLooper());
-    private Runnable pollingRunnable;
-    private static final long POLLING_INTERVAL = 2000; // 2 másodpercenként frissít
 
     public ChatViewModel(Application application) {
         super(application);
@@ -32,7 +24,7 @@ public class ChatViewModel extends AndroidViewModel {
 
     public LiveData<List<Message>> getMessages(Long groupId) {
         repo.loadMessages(groupId, messages);
-        startPolling(groupId); // Indítja a folyamatos frissítést
+        // startPolling(groupId);  --> ezt eltávolítottuk, mert broadcast receiver lesz a frissítés
         return messages;
     }
 
@@ -48,17 +40,6 @@ public class ChatViewModel extends AndroidViewModel {
                 // Hiba kezelése
             }
         });
-    }
-
-    private void startPolling(Long groupId) {
-        pollingRunnable = new Runnable() {
-            @Override
-            public void run() {
-                repo.loadMessages(groupId, messages);
-                handler.postDelayed(this, POLLING_INTERVAL);
-            }
-        };
-        handler.postDelayed(pollingRunnable, POLLING_INTERVAL);
     }
 
     public void addUserToGroup(long groupId, long userId, Runnable onSuccess, Runnable onFailure) {
@@ -101,13 +82,5 @@ public class ChatViewModel extends AndroidViewModel {
                 onFailure.run();
             }
         });
-    }
-
-
-
-    @Override
-    protected void onCleared() {
-        super.onCleared();
-        handler.removeCallbacks(pollingRunnable); // Leállítja a pollingot, ha az Activity/Fragment megszűnik
     }
 }

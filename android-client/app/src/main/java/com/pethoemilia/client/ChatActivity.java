@@ -1,7 +1,10 @@
 package com.pethoemilia.client;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,6 +28,8 @@ import com.pethoemilia.client.entity.Group;
 import com.pethoemilia.client.entity.Message;
 import com.pethoemilia.client.entity.User;
 
+import java.util.List;
+
 public class ChatActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
@@ -35,10 +40,38 @@ public class ChatActivity extends AppCompatActivity {
     private Button buttonSend;
     private EditText editTextEmail;
     private Button buttonAddUser;
-    private Button buttonRemoveUser; // ÚJ
+    private Button buttonRemoveUser;
     private LinearLayout addUserLayout;
 
     private Group currentGroup;
+
+    // ÚJ: BroadcastReceiver a csoportfrissítéshez
+    private final BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            long receivedGroupId = intent.getLongExtra("groupId", -1);
+            if (currentGroup != null && receivedGroupId == currentGroup.getId()) {
+                chatViewModel.getMessages(currentGroup.getId()).observe(ChatActivity.this, messages -> {
+                    adapter.setMessages(messages);
+                    recyclerView.scrollToPosition(adapter.getItemCount() - 1);
+                });
+            }
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter("com.pethoemilia.NEW_MESSAGE");
+        registerReceiver(messageReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(messageReceiver);
+    }
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -63,6 +96,7 @@ public class ChatActivity extends AppCompatActivity {
 
         ImageView buttonToggleAddUser = findViewById(R.id.buttonAdd);
         ImageView buttonDeleteGroup = findViewById(R.id.buttonDeleteGroup);
+
         currentGroup = getGroupFromSharedPreferences();
         if (currentGroup != null) {
             User currentUser = getUserFromSharedPreferences();
@@ -83,7 +117,6 @@ public class ChatActivity extends AppCompatActivity {
             });
 
             buttonSend.setOnClickListener(v -> sendMessage());
-
 
             buttonToggleAddUser.setOnClickListener(v -> {
                 if (addUserLayout.getVisibility() == View.GONE) {
@@ -118,13 +151,8 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
 
-
             buttonAddUser.setOnClickListener(v -> addUserByEmail());
             buttonRemoveUser.setOnClickListener(v -> removeUserByEmail());
-
-//            buttonDeleteGroup.setOnClickListener(v ->
-//                    Toast.makeText(this, "Csoport törlés funkció még nincs implementálva", Toast.LENGTH_SHORT).show()
-//            );
         }
     }
 
@@ -170,7 +198,6 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(this, "Írj be egy email címet", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     private User getUserFromSharedPreferences() {
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
