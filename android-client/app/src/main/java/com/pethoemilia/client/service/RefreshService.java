@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -229,6 +231,7 @@ public class RefreshService extends Service {
                 Intent intent = new Intent(this, GroupActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+                Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(this, MyConst.CHANNEL_ID)
                         .setSmallIcon(R.drawable.done_icon)
@@ -236,6 +239,7 @@ public class RefreshService extends Service {
                         .setContentText(notificationText)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setContentIntent(pendingIntent)
+                        .setSound(soundUri)
                         .setAutoCancel(true);
 
                 NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
@@ -270,5 +274,4 @@ public class RefreshService extends Service {
         Intent intent = new Intent("com.pethoemilia.UPDATE_GROUPS");
         sendBroadcast(intent);
     }
-
 }
