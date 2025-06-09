@@ -1,7 +1,9 @@
 package com.pethoemilia.client;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +33,36 @@ public class GroupActivity extends AppCompatActivity {
     private GroupViewModel viewModel;
     private Button logoutButton;
     private User user;
+
+    private final BroadcastReceiver groupUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (user != null) {
+                viewModel.loadGroups(user.getId(), GroupActivity.this); // Újratölti a csoportokat
+            }
+        }
+    };
+
+    private boolean isReceiverRegistered = false;
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!isReceiverRegistered) {
+            IntentFilter filter = new IntentFilter("com.pethoemilia.UPDATE_GROUPS");
+            registerReceiver(groupUpdateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+            isReceiverRegistered = true;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (isReceiverRegistered) {
+            unregisterReceiver(groupUpdateReceiver);
+            isReceiverRegistered = false;
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
