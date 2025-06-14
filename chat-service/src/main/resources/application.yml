@@ -7,7 +7,7 @@ spring:
       api-key: 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
       base-url: https://api.groq.com/openai
   rabbitmq:
-    host: 192.168.0.102
+    host: 192.168.0.103
     port: 5672
     username: guest
     password: guest

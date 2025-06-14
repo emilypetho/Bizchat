@@ -24,9 +24,23 @@ public class GroupService {
 	private final IGroupRepository groupRepo;
 	private final MessageService messageService;
 
+//	public Group save(Group group) {
+//		return groupRepo.save(group);
+//	}
+	
 	public Group save(Group group) {
+		if (group.getUsers() != null && !group.getUsers().isEmpty()) {
+			String firstCompany = group.getUsers().get(0).getCompany().getName();
+			boolean allSameCompany = group.getUsers().stream()
+				.allMatch(user -> user.getCompany().getName().equals(firstCompany));
+
+			if (!allSameCompany) {
+				throw new IllegalArgumentException("A csoportban csak azonos céghez tartozó felhasználók lehetnek.");
+			}
+		}
 		return groupRepo.save(group);
 	}
+
 
 	public void delete(Long id) {
 		groupRepo.deleteById(id);
@@ -51,7 +65,7 @@ public class GroupService {
 			sb.append(message.getSender().getName() + ":");
 			sb.append(message.getContent() + "\n");
 		}
-		ChatResponse response = chatModel.call(new Prompt("Foglald ossze: \"" + sb.toString() + "\"",
+		ChatResponse response = chatModel.call(new Prompt("Summarize it in a few sentences and translate it into Hungarian.: \"" + sb.toString() + "\"",
 				OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.4).build()));
 		response.toString();
 		var resultList = response.getResults();
@@ -62,7 +76,7 @@ public class GroupService {
 		return responses.toString();
 	}
 	public String translate(String message) {
-		ChatResponse response = chatModel.call(new Prompt("Please translate to english: \"" + message.toString() + "\"",
+		ChatResponse response = chatModel.call(new Prompt("Please translate to hungary: \"" + message.toString() + "\"",
 				OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.4).build()));
 		response.toString();
 		var resultList = response.getResults();
@@ -75,15 +89,35 @@ public class GroupService {
 	@Autowired
 	private final UserService userService;
 
+//	public void addUserToGroup(Long groupId, Long userId) {
+//		Group group = findById(groupId);
+//		User user = userService.findById(userId);
+//
+//		if (group != null && user != null && !group.getUsers().contains(user)) {
+//			group.getUsers().add(user);
+//			groupRepo.save(group);
+//		}
+//	}
+	
 	public void addUserToGroup(Long groupId, Long userId) {
 		Group group = findById(groupId);
 		User user = userService.findById(userId);
 
-		if (group != null && user != null && !group.getUsers().contains(user)) {
+		if (group == null || user == null) return;
+
+		boolean allSameCompany = group.getUsers().stream()
+			.allMatch(existingUser -> existingUser.getCompany().getName().equals(user.getCompany().getName()));
+
+		if (!allSameCompany) {
+			throw new IllegalArgumentException("A felhasználó nem csatlakozhat ehhez a csoporthoz, mert másik cégnél dolgozik.");
+		}
+
+		if (!group.getUsers().contains(user)) {
 			group.getUsers().add(user);
 			groupRepo.save(group);
 		}
 	}
+
 
 	public void removeUserFromGroup(Long groupId, Long userId) {
 		Group group = findById(groupId);

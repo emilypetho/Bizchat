@@ -66,7 +66,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (!isReceiverRegistered) {
-            IntentFilter filter = new IntentFilter("com.pethoemilia.NEW_MESSAGE");
+            IntentFilter filter = new IntentFilter("com.pethoemilia.NEW_MESSAGE"+currentGroup.getId());
             registerReceiver(messageReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
             isReceiverRegistered = true;
         }

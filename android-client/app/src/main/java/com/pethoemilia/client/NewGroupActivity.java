@@ -1,6 +1,7 @@
 package com.pethoemilia.client;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
@@ -15,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.google.gson.Gson;
 import com.pethoemilia.client.ViewModel.NewGroupViewModel;
 import com.pethoemilia.client.entity.User;
+import com.pethoemilia.client.service.RefreshService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +40,6 @@ public class NewGroupActivity extends AppCompatActivity {
         createGroupButton = findViewById(R.id.buttonCreateGroup);
         addUserButton = findViewById(R.id.buttonAddUser);
 
-        // ViewModel és felhasználó betöltése
         viewModel = new ViewModelProvider(this).get(NewGroupViewModel.class);
 
         SharedPreferences sharedPreferences = getSharedPreferences(MyConst.SHARED_PREF_KEY, Context.MODE_PRIVATE);
@@ -72,6 +73,9 @@ public class NewGroupActivity extends AppCompatActivity {
 
             String authHeader = sharedPreferences.getString(MyConst.AUTH, null);
             viewModel.createGroup(currentUser, groupName, userEmails, authHeader, this);
+//            Toast.makeText(this, "Adj hozzá legalább egy felhasználót!", Toast.LENGTH_SHORT).show();
+            stopService(new Intent(this, RefreshService.class));
+            startService(new Intent(this, RefreshService.class));
         });
 
         viewModel.getToastMessage().observe(this, message -> Toast.makeText(NewGroupActivity.this, message, Toast.LENGTH_SHORT).show());

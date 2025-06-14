@@ -38,7 +38,7 @@ public class GroupActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (user != null) {
-                viewModel.loadGroups(user.getId(), GroupActivity.this); // Újratölti a csoportokat
+                viewModel.loadGroups(user.getId(), GroupActivity.this);
             }
         }
     };

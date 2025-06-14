@@ -84,26 +84,9 @@ public class RefreshService extends Service {
                                     try {
 
                                         for (Group group : groupk) {
-
-                                            /////////////////////// Ez csak tesztnek van itt, gombra es uj endpointok
-//                                            String encodedCredentials = sharedPreferences.getString(MyConst.AUTH, null);
-//                                            groupClient.summarize(group.getId(),encodedCredentials).enqueue(new Callback<String>() {
-//                                                @Override
-//                                                public void onResponse(Call<String> call, Response<String> response) {
-//                                                    response.toString();
-//                                                }
-//
-//                                                @Override
-//                                                public void onFailure(Call<String> call, Throwable t) {
-//                                                    t.toString();
-//                                                }
-//                                            });
-                                            /////////////////////////// eddig tart a teszt, ez osszefoglalja egy groupban a beszelgetest
                                             String queueName = "chatQueue" + applicationKey;
                                             channel.queueDeclare(queueName, true, false, false, null);
                                             channel.queueBind(queueName, "newMessageExchange", group.getId().toString());
-//                                            String queueName = channel.queueDeclare().getQueue();
-//                                            channel.queueBind(queueName, "newMessageExchange", group.getName());
                                             try {
                                                 channel.basicConsume(queueName, autoAck, "chatQueue",
                                                         new DefaultConsumer(channel) {
@@ -205,7 +188,6 @@ public class RefreshService extends Service {
                 String userJson = sharedPreferences.getString(MyConst.USER, null);
                 if (userJson != null) {
                     User currentUser = gson.fromJson(userJson, User.class);
-                    // Ellenőrzés, hogy a felhasználó benne van-e a csoportban, és hogy nem a feladó
                     notification(groupUsers, currentUser, jsonObject, notificationText);
                 }
             }
@@ -266,7 +248,7 @@ public class RefreshService extends Service {
     }
 
     private void sendBroadcastToChat(long groupId) {
-        Intent intent = new Intent("com.pethoemilia.NEW_MESSAGE");
+        Intent intent = new Intent("com.pethoemilia.NEW_MESSAGE"+groupId);
         intent.putExtra("groupId", groupId);
         sendBroadcast(intent);
     }
