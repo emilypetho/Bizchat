@@ -123,7 +123,8 @@ public class UserRegistrationActivity extends AppCompatActivity {
                                                 addressEditText.getText().toString(),
                                                 telEditText.getText().toString(),
                                                 c,
-                                                role
+                                                role,
+                                                "en"
                                         ));
 
                                         userCall.enqueue(new Callback<User>() {

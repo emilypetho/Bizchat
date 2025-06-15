@@ -13,7 +13,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private SettingsViewModel settingsViewModel;
     private boolean initialTheme;
-    private boolean isSwitchBeingUpdatedProgrammatically = false; // fontos flag
+    private boolean isSwitchBeingUpdatedProgrammatically = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

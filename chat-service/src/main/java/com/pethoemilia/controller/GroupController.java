@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pethoemilia.entity.Group;
@@ -66,8 +67,8 @@ public class GroupController {
 	
 	@PostMapping(value = "/translate", produces = "application/json")
 	@Transactional
-	public ResponseEntity<String> translate(@RequestBody String message) {
-		return new ResponseEntity<>(groupService.translate(message), HttpStatus.OK);
+	public ResponseEntity<String> translate(@RequestBody String message,@RequestParam(name = "lang",required = false, defaultValue = "en") String lang) {
+		return new ResponseEntity<>(groupService.translate(message, lang), HttpStatus.OK);
 	}
 	@PostMapping(value = "/addUser/{groupId}/{userId}")
 	@Transactional

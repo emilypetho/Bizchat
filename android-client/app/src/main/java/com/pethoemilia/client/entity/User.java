@@ -14,7 +14,7 @@ public class User {
 	public User() {
 	}
 
-	public User(String email, String password, String name, String address, String tel, Company company, Role role) {
+	public User(String email, String password, String name, String address, String tel, Company company, Role role, String lang) {
 		this.email = email;
 		this.name = name;
 		this.address = address;
@@ -22,6 +22,7 @@ public class User {
 		this.phone_number = tel;
 		this.company = company;
 		this.role = role;
+		this.lang = lang;
 	}
 	protected Long id;
 	private String email;
@@ -39,6 +40,7 @@ public class User {
 	}
 	private Role role;
 	private List<Group> groupk = new ArrayList<>();
+	private String lang;
 
 	public Long getId() {
 		return id;
@@ -128,5 +130,13 @@ public class User {
 				}
 			});
 		}
+	}
+
+	public String getLang() {
+		return lang;
+	}
+
+	public void setLang(String lang) {
+		this.lang = lang;
 	}
 }

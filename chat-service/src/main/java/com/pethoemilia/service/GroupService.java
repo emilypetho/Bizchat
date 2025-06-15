@@ -75,8 +75,9 @@ public class GroupService {
 		}
 		return responses.toString();
 	}
-	public String translate(String message) {
-		ChatResponse response = chatModel.call(new Prompt("Please translate to hungary: \"" + message.toString() + "\"",
+	public String translate(String message, String lang) {
+		String prompt = lang != "en" ? "Please translate to hungarian: \"" : "Please translate to english: \"";
+		ChatResponse response = chatModel.call(new Prompt(prompt + message.toString() + "\"",
 				OpenAiChatOptions.builder().model("llama3-70b-8192").temperature(0.4).build()));
 		response.toString();
 		var resultList = response.getResults();

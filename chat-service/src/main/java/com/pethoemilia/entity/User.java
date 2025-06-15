@@ -97,4 +97,7 @@ public class User {
 	@ManyToMany(targetEntity = Group.class, mappedBy = "users", cascade = CascadeType.REMOVE)
 	@JsonIgnore
 	Set<Group> groupk;
+	
+	@Size(max = 3, message = "Address can be up to 3 characters")
+	private String lang;
 }

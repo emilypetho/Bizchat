@@ -283,7 +283,13 @@ public class ChatRepository {
 
     public void translate(String message, StringCallback callback) {
         String authHeader = sharedPref.getString(MyConst.AUTH, null);
-        Call<ResponseBody> call = groupClient.trsanslate(message, authHeader);
+        String userJson = sharedPref.getString(MyConst.USER, null);
+        User user = null;
+        if (userJson != null) {
+            Gson gson = new Gson();
+            user = gson.fromJson(userJson, User.class);
+        }
+        Call<ResponseBody> call = groupClient.trsanslate(message,user == null ? "en" : user.getLang(), authHeader);
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> callResult, Response<ResponseBody> response) {

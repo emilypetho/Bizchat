@@ -12,6 +12,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface GroupClient {
     @GET("group/findByUserId/{id}")
@@ -23,7 +24,7 @@ public interface GroupClient {
     @GET("group/summarize/{id}")
     Call<ResponseBody> summarize(@Path("id") long id, @Header("Authorization") String authHeader);
     @POST("group/translate")
-    Call<ResponseBody> trsanslate(@Body String message, @Header("Authorization") String authHeader);
+    Call<ResponseBody> trsanslate(@Body String message, @Query("lang") String lang, @Header("Authorization") String authHeader);
 
     @POST("group/addUser/{groupId}/{userId}")
     Call<Void> addUserToGroup(@Path("groupId") long groupId, @Path("userId") long userId, @Header("Authorization") String authHeader);
